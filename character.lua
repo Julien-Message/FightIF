@@ -26,7 +26,7 @@ function Character:initialize(name, x, y)
 
 	self.currentPic = 1
 	self.pictureTimer = 0 
-	self.pictureDuration = 30 -- number of frames a picture should be displayed
+	self.pictureDuration = 0.5
 end
 
 function Character:getState()
@@ -53,8 +53,8 @@ function Character:move(dt)
 	end
 end
 
-function Character:updatePicture()
-	self.pictureTimer = self.pictureTimer + 1
+function Character:updatePicture(dt)
+	self.pictureTimer = self.pictureTimer + dt
 	if self.pictureTimer > self.pictureDuration then
 		self.pictureTimer = 0
 		self.currentPic = self.currentPic % table.getn(self.sprites[self.automate.currentState]) + 1
@@ -63,7 +63,7 @@ end
 
 function Character:update(dt)
 	self:move(dt)
-	self:updatePicture()
+	self:updatePicture(dt)
 end
 
 function Character:draw()
