@@ -9,27 +9,33 @@ function Character:initialize(name, x, y)
 	self.y = y
 	self.speed = 100
 
-	self.graphicsFolder = mainGraphicsFolder.."/"..name
-	self.automate = Automate:new()
-	self.automate.tableEtat = {
+	self.automate = Automate()
+	self.automate.states = {
 		Idle = {R = "Right", L = "Left", N="Idle",T = "Idle", TIME = frameTime},
 		Right = {R = "Right", L = "Left",N="Idle", T = "Right", TIME = frameTime},
 		Left = {R = "Right", L = "Left", T = "Left", N="Idle", TIME = frameTime}
 	}
+	self.automate.currentState = "Idle"
 
 	self.sprites = {}
-	for stateName, unused in pairs(self.automate.tableEtat) do
-		self.sprites[stateName] = love.filesystem.getDirectoryItems(mainGraphicsFolder.."/"..name.."/"..stateName)
+	for stateName, unused in pairs(self.automate.states) do
+		self.sprites[stateName] = {}
+		for i,picture in ipairs(love.filesystem.getDirectoryItems(graphicsFolder.."/"..name.."/"..stateName)) do
+			table.insert(self.sprites[stateName], love.graphics.newImage(graphicsFolder.."/"..name.."/"..stateName.."/"..picture))
+		end 
 	end
 
-	self.automate.currentState = "Idle"
 	self.currentPic = 1
 	self.pictureTimer = 0 
 	self.pictureDuration = 30 -- number of frames a picture should be displayed
 end
 
+function Character:loadPictures(state)
+	
+end
+
 function Character:press(input)
-	if self.automate:changeEtat(input) then
+	if self.automate:applyEvent(input) then
 		self.pictureTimer = 0
 		self.currentPic = 1
 	end
@@ -51,8 +57,5 @@ end
 
 function Character:draw()
 	love.graphics.setColor(255,255,255,255)
-	local picture = love.graphics.newImage(mainGraphicsFolder.."/"..self.name.."/"..
-											self.automate.currentState.."/"..
-											self.sprites[self.automate.currentState][self.currentPic])
-    love.graphics.draw(picture, mouton.x, mouton.y)
+    love.graphics.draw(self.sprites[self.automate.currentState][self.currentPic], mouton.x, mouton.y)
 end

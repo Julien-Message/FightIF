@@ -1,7 +1,7 @@
 class = require 'middleclass'
 require "character"
 
-mainGraphicsFolder = "graphics"
+graphicsFolder = "graphics"
 
 function love.load()
     frameTime = 0.5
