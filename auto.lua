@@ -1,35 +1,26 @@
-local _M = {}
+Automate = class('Automate') -- class Automate
 
-local class = require("middleclass")
-
-_M.Automate = class('Automate') -- class Automate
-function _M.Automate:init() -- Initalisation Automate
+function Automate:initialize() -- Initalisation Automate
     self.tableEtat = {}
-    self.sprites = {}
-    self.Etat = nil
-    self.lastTimer = nil
+    self.currentState = nil
+    self.lastTimer = love.timer.getTime()
 end
 
-function _M.Automate:ChangeEtat(input)
-    local lastEtat = self.Etat
+function Automate:changeEtat(input) --returns true if the state has changed
+    local lastState = self.currentState
     if input then
-        self.Etat = self.tableEtat[self.Etat][input]
+        self.currentState = self.tableEtat[self.currentState][input]
     end
 
-    if (lastEtat == self.Etat) then
+    if (lastState == self.currentState) then
         local currentTime = love.timer.getTime()
-        if (currentTime - self.lastTimer) > self.tableEtat[self.Etat]["TIME"] then
-            self.Etat = self.tableEtat[self.Etat]["T"]
+        if (currentTime - self.lastTimer) > self.tableEtat[self.currentState]["TIME"] then
+            self.currentState = self.tableEtat[self.currentState]["T"]
             self.lastTimer = love.timer.getTime()
         end
+        return false
     else
         self.lastTimer = love.timer.getTime()
+        return true
     end
-    
 end
-
-function _M.Automate:DrawEtat()
-    return self.sprites[self.Etat]
-end 
-
-return _M
