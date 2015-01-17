@@ -1,8 +1,8 @@
 Automate = class('Automate') -- class Automate
 
-function Automate:initialize() -- Initalisation Automate
-    self.states = {}
-    self.currentState = nil
+function Automate:initialize(states, state) -- Initalisation Automate
+    self.states = states
+    self.currentState = state
     self.lastTimer = love.timer.getTime()
 end
 

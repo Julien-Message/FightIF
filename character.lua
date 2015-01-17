@@ -9,13 +9,12 @@ function Character:initialize(name, x, y)
 	self.y = y
 	self.speed = 100
 
-	self.automate = Automate()
-	self.automate.states = {
+	local states = {
 		Idle = {R = "Right", L = "Left", N="Idle",T = "Idle", TIME = frameTime},
 		Right = {R = "Right", L = "Left",N="Idle", T = "Right", TIME = frameTime},
 		Left = {R = "Right", L = "Left", T = "Left", N="Idle", TIME = frameTime}
 	}
-	self.automate.currentState = "Idle"
+	self.automate = Automate(states, "Idle")
 
 	self.sprites = {}
 	for stateName, unused in pairs(self.automate.states) do
