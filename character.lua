@@ -29,8 +29,12 @@ function Character:initialize(name, x, y)
 	self.pictureDuration = 30 -- number of frames a picture should be displayed
 end
 
-function Character:loadPictures(state)
-	
+function Character:getState()
+	return self.automate.currentState
+end
+
+function Character:getCurrentPicture()
+	return self.sprites[self:getState()][self.currentPic]
 end
 
 function Character:press(input)
@@ -40,13 +44,16 @@ function Character:press(input)
 	end
 end
 
-function Character:update(dt)
-	if self.automate.currentState == "Right" then
+function Character:move(dt)
+	local state = self:getState()
+	if state == "Right" then
 		self.x = self.x + self.speed * dt
-	elseif self.automate.currentState == "Left" then
+	elseif state == "Left" then
 		self.x = self.x - self.speed * dt
 	end
+end
 
+function Character:updatePicture()
 	self.pictureTimer = self.pictureTimer + 1
 	if self.pictureTimer > self.pictureDuration then
 		self.pictureTimer = 0
@@ -54,7 +61,12 @@ function Character:update(dt)
 	end
 end
 
+function Character:update(dt)
+	self:move(dt)
+	self:updatePicture()
+end
+
 function Character:draw()
 	love.graphics.setColor(255,255,255,255)
-    love.graphics.draw(self.sprites[self.automate.currentState][self.currentPic], mouton.x, mouton.y)
+    love.graphics.draw(self:getCurrentPicture(), mouton.x, mouton.y)
 end
