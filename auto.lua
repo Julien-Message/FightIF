@@ -6,10 +6,10 @@ function Automate:initialize(states, state) -- Initalisation Automate
     self.lastTimer = love.timer.getTime()
 end
 
-function Automate:applyEvent(input) --returns true if the state has changed
+function Automate:applyEvent(event) --returns true if the state has changed
     local lastState = self.currentState
-    if input then
-        self.currentState = self.states[self.currentState][input]
+    if event then
+        self.currentState = self.states[self.currentState][event]
     end
 
     if lastState == self.currentState then

@@ -2,46 +2,71 @@ class = require 'middleclass'
 require "character"
 
 graphicsFolder = "graphics"
+debug = true
+
+function love.keypressed(k)
+    if k == 'escape' then
+        love.event.quit() -- quits the program
+    elseif k == 'd' then
+        debug = not debug -- displays debug info or not
+    end
+end
+
+function loadGround()
+    local width = 600 --try not falling !
+    local height = 100
+    ground = {}
+    ground.body = love.physics.newBody(world, 800/2, 600-height/2, "static") --remember, the shape anchors to the body from its center
+    ground.shape = love.physics.newRectangleShape(width, height) --make a rectangle with a width of 650 and a height of 50
+    ground.fixture = love.physics.newFixture(ground.body, ground.shape) --attach shape to body
+end
 
 function loadWorld()
-    love.physics.setMeter(64)
-    world = love.physics.newWorld(0, 9.81*64, true)
+    scale = 64 --pixels per meter
+    love.physics.setMeter(scale)
+    world = love.physics.newWorld(0, 9.81*scale, true) -- Unfortunately, we're not in space, so gravity
+    loadGround()
 end
 
 function loadCharacters()
     return {
-        Character("Mouton", 300, 300)
+        Character("Mouton", 100, 200)
     }
 end
 
 function love.load()
     frameTime = 0.5
+    love.window.setMode(800, 600)
+    love.window.setTitle("FightIF")
     loadWorld()
     characters = loadCharacters()
-    love.window.setTitle("FightIF")
 end
 
 function love.update(dt)
-    for i,character in ipairs(characters) do
-        if love.keyboard.isDown("left") then
-                character:press("L")
-        elseif love.keyboard.isDown("right") then
-                character:press("R")
-        elseif love.keyboard.isDown(" ") then
-                character:press("S")
-        else
-                character:press("N")
-        end
+    for _,character in ipairs(characters) do
         character:update(dt)
     end
+    world:update(dt)
 end
 
 function love.draw()
     -- let's draw some ground
-    love.graphics.setColor(0,255,0,255)
-    love.graphics.rectangle("fill", 0,465,800,150)
+    love.graphics.setColor(72, 160, 14)
+    love.graphics.polygon("fill", ground.body:getWorldPoints(ground.shape:getPoints()))
     
-    for i,character in ipairs(characters) do
+    if debug then
+        local _,y = world:getGravity()
+        love.graphics.print("Gravity = " .. y)
+        love.graphics.print("X : " .. ground.body:getX() .. ", Y = " .. ground.body:getY() ..
+        "\nBody is " .. ground.body:getType() ..
+        "\nMass is " .. ground.body:getMass(),
+        400, 50)
+    end
+
+    for _,character in ipairs(characters) do
+        if debug then
+            character:drawDebug()
+        end
         character:draw()
     end
 end
