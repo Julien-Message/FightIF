@@ -5,8 +5,7 @@ Character = class('Character')
 function Character:initialize(name, x, y)
 	self.name = name
 
-	self.x = x
-	self.y = y
+	self.body = love.physics.newBody(world, x, y, "dynamic")
 	self.speed = 100
 
 	local states = {
@@ -47,9 +46,9 @@ end
 function Character:move(dt)
 	local state = self:getState()
 	if state == "Right" then
-		self.x = self.x + self.speed * dt
+		self.body:setX(self.body:getX() + self.speed * dt)
 	elseif state == "Left" then
-		self.x = self.x - self.speed * dt
+		self.body:setX(self.body:getX() - self.speed * dt)
 	end
 end
 
@@ -68,5 +67,5 @@ end
 
 function Character:draw()
 	love.graphics.setColor(255,255,255,255)
-    love.graphics.draw(self:getCurrentPicture(), mouton.x, mouton.y)
+    love.graphics.draw(self:getCurrentPicture(), self.body:getX(), self.body:getY())
 end

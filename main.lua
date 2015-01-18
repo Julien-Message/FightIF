@@ -3,32 +3,47 @@ require "character"
 
 graphicsFolder = "graphics"
 
+function loadWorld()
+    love.physics.setMeter(64)
+    world = love.physics.newWorld(0, 9.81*64, true)
+end
+
+function loadCharacters()
+    return {
+        Character("Mouton", 300, 300)
+    }
+end
+
 function love.load()
     frameTime = 0.5
-    mouton = Character("Mouton", 300, 300)
-    love.window.setTitle("Le Mouton")
+    loadWorld()
+    characters = loadCharacters()
+    love.window.setTitle("FightIF")
 end
 
 function love.update(dt)
-    if love.keyboard.isDown("left") then
-            mouton:press("L")
-    elseif love.keyboard.isDown("right") then
-            mouton:press("R")
-    elseif love.keyboard.isDown(" ") then
-            mouton:press("S")
-    else
-            mouton:press("N")
+    for i,character in ipairs(characters) do
+        if love.keyboard.isDown("left") then
+                character:press("L")
+        elseif love.keyboard.isDown("right") then
+                character:press("R")
+        elseif love.keyboard.isDown(" ") then
+                character:press("S")
+        else
+                character:press("N")
+        end
+        character:update(dt)
     end
-    mouton:update(dt)
 end
 
 function love.draw()
     -- let's draw some ground
     love.graphics.setColor(0,255,0,255)
     love.graphics.rectangle("fill", 0,465,800,150)
-
-    -- let's draw our mouton
-    mouton:draw()
+    
+    for i,character in ipairs(characters) do
+        character:draw()
+    end
 end
 
 
