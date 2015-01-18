@@ -14,6 +14,8 @@ function love.update(dt)
             mouton:press("L")
     elseif love.keyboard.isDown("right") then
             mouton:press("R")
+    elseif love.keyboard.isDown(" ") then
+            mouton:press("S")
     else
             mouton:press("N")
     end
