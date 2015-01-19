@@ -30,6 +30,15 @@ function Character:initialize(name, x, y)
     self.currentPic = 1
     self.pictureTimer = 0 
     self.pictureDuration = 0.5
+
+    self.punctualInputs = {
+        v  = "J"
+    }
+
+    self.continuousInputs = {
+        right = "R",
+        left = "L"
+    }
 end
 
 function Character:getState()
@@ -40,8 +49,14 @@ function Character:getCurrentPicture()
     return self.sprites[self:getState()][self.currentPic]
 end
 
+function Character:applyInput(keyPressed)
+    if self.punctualInputs[keyPressed] then
+        self:applyEvent(self.punctualInputs[keyPressed])
+    end
+ end
+
 -- applies the event in the automata
-function Character:apply(event)
+function Character:applyEvent(event)
     if self.automate:applyEvent(event) then --if the state has changed
         self.pictureTimer = 0
         self.currentPic = 1
@@ -59,6 +74,8 @@ function Character:move() -- TODO change the function's name and content
     elseif state == "Idle" then
         local _,y = self.body:getLinearVelocity()
         self.body:setLinearVelocity(0, y)
+    elseif state == "Falling" then
+
     end
 end
 
@@ -73,14 +90,15 @@ end
 
 --looks which key is down and do the necessary things
 function Character:update(dt)
-    if love.keyboard.isDown("left") then
-        self:apply("L")
-    elseif love.keyboard.isDown("right") then
-        self:apply("R")
-    --elseif love.keyboard.isDown(" ") then
-    --    self:apply("S")
-    else
-        self:apply("N")
+    local inputIsApplied = false
+    for input, event in pairs(self.continuousInputs) do
+        if love.keyboard.isDown(input) then
+            self:applyEvent(event)
+            inputIsApplied = true
+        end
+    end
+    if not inputIsApplied then
+        self:applyEvent("N")
     end
     self:move()
     self:updatePicture(dt)

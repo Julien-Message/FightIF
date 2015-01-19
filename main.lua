@@ -9,6 +9,10 @@ function love.keypressed(k)
         love.event.quit() -- quits the program
     elseif k == 'd' then
         debug = not debug -- displays debug info or not
+    else
+        for _,character in ipairs(characters) do
+            character:applyInput(k)
+        end
     end
 end
 
