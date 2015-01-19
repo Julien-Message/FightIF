@@ -9,7 +9,10 @@ end
 function Automate:applyEvent(event) --returns true if the state has changed
     local lastState = self.currentState
     if event then
-        self.currentState = self.states[self.currentState][event]
+        local newState = self.states[self.currentState][event]
+        if newState then -- a nil newState means the transition doesn't exist so we assume that we have to stay in the same state
+            self.currentState = newState
+        end
     end
 
     if lastState == self.currentState then
