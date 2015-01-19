@@ -13,7 +13,9 @@ function Character:initialize(name, x, y)
     self.shape = love.physics.newRectangleShape( Character.width, Character.height )
     self.fixture = love.physics.newFixture(self.body, self.shape)
 
+    self.body:setFixedRotation(true)
     self.fixture:setFriction(0)
+
     self.speed = 100
 
     local states = {
@@ -46,8 +48,6 @@ function Character:initialize(name, x, y)
         left = "L",
         g = "G"
     }
-
-    --self.fixture:setRestitution(1.01) --if you want to make a joke
 end
 
 function Character:getState()
