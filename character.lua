@@ -2,12 +2,18 @@ require "auto"
 
 Character = class('Character')
 
+Character.static.width = 64
+Character.static.height = 128
+Character.static.quad = love.graphics.newQuad(0, 0, Character.width, Character.height, Character.width, Character.height)
+
 function Character:initialize(name, x, y)
     self.name = name
 
     self.body = love.physics.newBody(world, x, y, "dynamic")
-    self.shape = love.physics.newRectangleShape( 64, 128 )
+    self.shape = love.physics.newRectangleShape( Character.width, Character.height )
     self.fixture = love.physics.newFixture(self.body, self.shape)
+
+    self.fixture:setFriction(0)
     self.speed = 100
 
     local states = {
@@ -37,8 +43,11 @@ function Character:initialize(name, x, y)
 
     self.continuousInputs = {
         right = "R",
-        left = "L"
+        left = "L",
+        g = "G"
     }
+
+    --self.fixture:setRestitution(1.01) --if you want to make a joke
 end
 
 function Character:getState()
@@ -106,7 +115,8 @@ end
 
 function Character:draw()
     love.graphics.setColor(255,255,255,255)
-    love.graphics.draw(self:getCurrentPicture(), self.body:getX() - 64/2, self.body:getY() - 128/2)
+    love.graphics.draw(self:getCurrentPicture(), Character.quad,
+        self.body:getX() - Character.width/2, self.body:getY() - Character.height/2)
 end
 
 --in case of debugging, display some useful informations
