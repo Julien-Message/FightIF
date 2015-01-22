@@ -24,11 +24,13 @@ function Character:initialize(name, x, y)
         Idle = {move = "Moving", jump = "Jumping", fall = "Falling", Guard = "Guarding", Punch = "Punching"},
         Moving = {stop="Idle", jump = "Jumping", fall = "Falling", Punch = "Punching"},
         Jumping = {Time = "Falling", Timer = 0.3},
-        Falling = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"}
+        Falling = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
+        JumpingAgain = {Time = "FallingAgain", Timer = 0.3},
+        FallingAgain = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"}
     }
     self.automate = Automate(states, "Idle")
-    self.movingStates = {"Idle", "Moving", "Falling"}
-    self.jumpingStates = {"Idle", "Moving"}
+    self.movingStates = {"Idle", "Moving", "Falling", "FallingAgain"}
+    self.jumpingStates = {"Idle", "Moving", "Falling"}
 
 --sets the inputs and their actions
     self.punctualInputs = {
@@ -62,10 +64,10 @@ function Character:initialize(name, x, y)
         end,
 
         jump = function ()
-            if self:canMove() and self:canJump() then
+            if self:canMove() and self:canJump() and self.automate:applyEvent("jump") then
                 local x,y = self.body:getLinearVelocity()
                 self.body:setLinearVelocity(x, y - 3 * self.speed)
-                return self.automate:applyEvent("jump")
+                return true
             end
         end,
 
@@ -99,7 +101,7 @@ function Character:initialize(name, x, y)
 
         default = function ()
             local x, y, dx, dy = self.body:getX(), self.body:getY(), self.body:getLinearVelocity()
-            if self:getState() == "Falling" then
+            if self:getState() == "Falling" or self:getState() == "FallingAgain" then
                 if dy == 0 then
                     return self:applyAction("hitTheGround")
                 end
@@ -111,13 +113,22 @@ function Character:initialize(name, x, y)
 
     -- loads the sprites into a table for quick access
     self.sprites = {}
-    for stateName, _ in pairs(self.automate.states) do
-        self.sprites[stateName] = {}
-        for i,picture in ipairs(love.filesystem.getDirectoryItems(graphicsFolder .. "/" .. name .. "/" .. stateName)) do
-            table.insert(self.sprites[stateName],
-                love.graphics.newImage(graphicsFolder .. "/" .. name .. "/" .. stateName .. "/" .. picture))
+    for _,folder in ipairs(love.filesystem.getDirectoryItems(graphicsFolder .. "/" .. name)) do
+        self.sprites[folder] = {}
+        for _,picture in ipairs(love.filesystem.getDirectoryItems(graphicsFolder .. "/" .. name .. "/" .. folder)) do
+            table.insert(self.sprites[folder],
+                love.graphics.newImage(graphicsFolder .. "/" .. name .. "/" .. folder .. "/" .. picture))
         end 
     end
+
+    self.spritesFolders = {
+        Idle = "idle",
+        Moving = "move",
+        Jumping = "move",
+        Falling = "move",
+        JumpingAgain = "move",
+        FallingAgain = "move"
+    }
 
     self.facingRight = true
 
@@ -190,7 +201,8 @@ function Character:loadAnimation()
 end
 
 function Character:getCurrentPicture()
-    return self.sprites[self:getState()][self.currentPic]
+    currentState = self:getState()
+    return self.sprites[self.spritesFolders[self:getState()]][self.currentPic]
 end
 
 --updates the picture to draw regarding the timer set for the current one
@@ -198,7 +210,7 @@ function Character:updatePicture(dt)
     self.pictureTimer = self.pictureTimer + dt
     if self.pictureTimer > self.pictureDuration then
         self.pictureTimer = 0
-        self.currentPic = self.currentPic % table.getn(self.sprites[self.automate.currentState]) + 1
+        self.currentPic = self.currentPic % table.getn(self.sprites[self.spritesFolders[self:getState()]]) + 1
     end
 end
 
