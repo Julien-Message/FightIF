@@ -5,6 +5,17 @@ Character = class('Character')
 Character.static.width = 64
 Character.static.height = 128
 Character.static.quad = love.graphics.newQuad(0, 0, Character.width, Character.height, Character.width, Character.height)
+Character.static.movingStates = {"Idle", "Moving", "Falling", "FallingAgain"}
+Character.static.jumpingStates = {"Idle", "Moving", "Falling"}
+
+Character.static.states = {
+    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", Guard = "Guarding", Punch = "Punching"},
+    Moving = {stop="Idle", jump = "Jumping", fall = "Falling", Punch = "Punching"},
+    Jumping = {Time = "Falling", Timer = 0.3},
+    Falling = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
+    JumpingAgain = {Time = "FallingAgain", Timer = 0.3},
+    FallingAgain = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"}
+}
 
 function Character:initialize(name, x, y)
     self.name = name
@@ -19,18 +30,7 @@ function Character:initialize(name, x, y)
 
     self.speed = 100
 
---sets the automata
-    local states = {
-        Idle = {move = "Moving", jump = "Jumping", fall = "Falling", Guard = "Guarding", Punch = "Punching"},
-        Moving = {stop="Idle", jump = "Jumping", fall = "Falling", Punch = "Punching"},
-        Jumping = {Time = "Falling", Timer = 0.3},
-        Falling = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
-        JumpingAgain = {Time = "FallingAgain", Timer = 0.3},
-        FallingAgain = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"}
-    }
-    self.automate = Automate(states, "Idle")
-    self.movingStates = {"Idle", "Moving", "Falling", "FallingAgain"}
-    self.jumpingStates = {"Idle", "Moving", "Falling"}
+    self.automate = Automate(Character.states, "Idle")
 
 --sets the inputs and their actions
     self.punctualInputs = {
@@ -66,7 +66,7 @@ function Character:initialize(name, x, y)
         jump = function ()
             if self:canMove() and self:canJump() and self.automate:applyEvent("jump") then
                 local x,y = self.body:getLinearVelocity()
-                self.body:setLinearVelocity(x, y - 3 * self.speed)
+                self.body:setLinearVelocity(x, -300)
                 return true
             end
         end,
@@ -108,6 +108,8 @@ function Character:initialize(name, x, y)
             elseif dy > 0 then
                     return self.automate:applyEvent("fall")
             end
+            --check if a timer has finished
+            self.automate:applyEvent()
         end
     }
 
@@ -176,7 +178,7 @@ end
 
 function Character:canMove()
     local currentState = self:getState()
-    for _,state in ipairs(self.movingStates) do
+    for _,state in ipairs(Character.movingStates) do
         if currentState == state then
             return true
         end
@@ -186,7 +188,7 @@ end
 
 function Character:canJump()
     local currentState = self:getState()
-    for _,state in ipairs(self.jumpingStates) do
+    for _,state in ipairs(Character.jumpingStates) do
         if currentState == state then
             return true
         end
