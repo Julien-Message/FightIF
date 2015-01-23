@@ -61,15 +61,6 @@ function love.draw()
     -- let's draw some ground
     love.graphics.setColor(72, 160, 14)
     love.graphics.polygon("fill", ground.body:getWorldPoints(ground.shape:getPoints()))
-    
-    if debug then
-        local _,y = world:getGravity()
-        love.graphics.print("Gravity = " .. y)
-        love.graphics.print("X : " .. ground.body:getX() .. ", Y = " .. ground.body:getY() ..
-        "\nBody is " .. ground.body:getType() ..
-        "\nMass is " .. ground.body:getMass(),
-        400, 50)
-    end
 
     for _,character in ipairs(characters) do
         if debug then
