@@ -202,6 +202,7 @@ end
 
 function Character:getCurrentPicture()
     currentState = self:getState()
+    print (" blah ", self:getState(), self.spritesFolders[self:getState()], self.currentPic, self.sprites[self.spritesFolders[self:getState()]])
     return self.sprites[self.spritesFolders[self:getState()]][self.currentPic]
 end
 
