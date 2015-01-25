@@ -128,10 +128,10 @@ function Character:initialize(name, x, y)
     self.spritesFolders = {
         Idle = "idle",
         Moving = "move",
-        Jumping = "move",
-        Falling = "move",
-        JumpingAgain = "move",
-        FallingAgain = "move"
+        Jumping = "jump",
+        Falling = "jump",
+        JumpingAgain = "jump",
+        FallingAgain = "jump"
     }
 
     self.facingRight = true
