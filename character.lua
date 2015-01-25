@@ -9,12 +9,14 @@ Character.static.movingStates = {"Idle", "Moving", "Falling", "FallingAgain"}
 Character.static.jumpingStates = {"Idle", "Moving", "Falling"}
 
 Character.static.states = {
-    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", Guard = "Guarding", Punch = "Punching"},
-    Moving = {stop="Idle", jump = "Jumping", fall = "Falling", Punch = "Punching"},
+    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", Guard = "Guarding", Punch = "Punching", stunningPunch = "Stunned"},
+    Moving = {stop="Idle", jump = "Jumping", fall = "Falling", Punch = "Punching", Guard = "Guarding", stunningPunch = "Stunned"},
     Jumping = {Time = "Falling", Timer = 0.3},
     Falling = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
     JumpingAgain = {Time = "FallingAgain", Timer = 0.3},
-    FallingAgain = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"}
+    FallingAgain = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
+	Guarding = {stop = "Idle", jump = "Jumping", move, = "Moving", Punch = "Punching" },
+	Stunned = {Time = "Idle", Timer = 0.75}
 }
 
 function Character:initialize(name, x, y)
@@ -120,7 +122,7 @@ function Character:initialize(name, x, y)
         for _,picture in ipairs(love.filesystem.getDirectoryItems(graphicsFolder .. "/" .. name .. "/" .. folder)) do
             table.insert(self.sprites[folder],
                 love.graphics.newImage(graphicsFolder .. "/" .. name .. "/" .. folder .. "/" .. picture))
-        end 
+        end
     end
 
     self.spritesFolders = {
@@ -135,7 +137,7 @@ function Character:initialize(name, x, y)
     self.facingRight = true
 
     self.currentPic = 1
-    self.pictureTimer = 0 
+    self.pictureTimer = 0
     self.pictureDuration = 0.3
 end
 
