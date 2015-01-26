@@ -38,7 +38,7 @@ end
 
 function loadCharacters()
     return {
-        Character("Mouton", 100, 200)
+        Character("Mouton", 200, 400)
     }
 end
 
