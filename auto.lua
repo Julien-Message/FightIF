@@ -15,6 +15,7 @@ function Automate:applyEvent(event) --returns true if the state has changed
                 self.nextState = newState
             else
                 self.currentState = newState
+                self.nextState = newState
                 if self.states[self.currentState]["Timer"] then
                     self.lastTimer = love.timer.getTime()
                 end
