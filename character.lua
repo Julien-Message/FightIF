@@ -4,7 +4,6 @@ Character = class('Character')
 
 Character.static.width = 64
 Character.static.height = 128
-Character.static.quad = love.graphics.newQuad(0, 0, Character.width, Character.height, Character.width, Character.height)
 Character.static.movingStates = {"Idle", "Moving", "Falling", "FallingAgain"}
 Character.static.jumpingStates = {"Idle", "Moving", "Falling"}
 
@@ -30,7 +29,8 @@ function Character:initialize(name, x, y)
     self.body:setFixedRotation(true)
     self.fixture:setFriction(0)
 
-    self.speed = 100
+    self.speed = 200
+    self.jumpSpeed = 500
 
     self.automate = Automate(Character.states, "Idle")
 
@@ -68,7 +68,7 @@ function Character:initialize(name, x, y)
         jump = function ()
             if self:canMove() and self:canJump() and self.automate:applyEvent("jump") then
                 local x,y = self.body:getLinearVelocity()
-                self.body:setLinearVelocity(x, -300)
+                self.body:setLinearVelocity(x, -self.jumpSpeed)
                 return true
             end
         end,
@@ -222,8 +222,10 @@ function Character:draw()
     love.graphics.setColor(255,255,255,255)
     local flipped
     if self.facingRight then flipped = 1 else flipped = -1 end
-    love.graphics.draw(self:getCurrentPicture(), Character.quad,
-        self.body:getX() - (flipped * Character.width/2), self.body:getY() - Character.height/2, rotation, flipped, 1)
+    love.graphics.draw(self:getCurrentPicture(), 
+        self.body:getX() - (flipped * Character.width/2),
+        self.body:getY() - Character.height/2,
+        0, flipped, 1)
 end
 
 --in case of debugging, display some useful informations
