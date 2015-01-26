@@ -113,8 +113,12 @@ function Character:initialize(name, x, y)
         end,
 
         guard = function ()
-            self:applyAction("stop")
-            return self.automate:applyEvent("guard")
+            if self.automate:applyEvent("guard") then
+                self.body:setLinearVelocity(0,0)
+                return true
+            else
+                return false
+            end
         end,
 
         punch = function ()
@@ -122,8 +126,12 @@ function Character:initialize(name, x, y)
         end,
 
         stop = function ()
-            self.body:setLinearVelocity(0,0)
-            return self.automate:applyEvent("stop")
+            if self.automate:applyEvent("stop") then
+                self.body:setLinearVelocity(0,0)
+                return true
+            else
+                return false
+            end
         end,
 
         hitTheGround = function ()
