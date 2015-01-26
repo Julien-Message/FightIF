@@ -7,16 +7,16 @@ Character.static.height = 128
 
 Character.static.states = {
     Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned"},
-    Moving = {stop="Idle", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
+    Moving = {move = "Moving", stop="Idle", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
 
     Jumping = {Time = "Falling", punch = "Uppercut", kick = "JumpingKick", Timer = 0.3},
-    Falling = {hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
-	FallingAfterPunch = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
+    Falling = {move = "Falling", hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
+	FallingAfterPunch = {move = "FallingAfterPunch", hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
     JumpingAgain = {Time = "FallingAgain", punch = "UppercutSecondJump", kick = "JumpingKick", Timer = 0.3},
-    FallingAgain = {hitTheGround = "Idle", punch = "UppercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
-	FallingAgainAfterPunch = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
+    FallingAgain = {move = "FallingAgain", hitTheGround = "Idle", punch = "UppercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
+	FallingAgainAfterPunch = {move = "FallingAgainAfterPunch", hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
 
-	Guarding = {stop = "Idle", jump = "Jumping", move = "Moving", punch = "Punching" },
+	Guarding = {stop = "Idle", jump = "Jumping", move = "Moving", punch = "Punching", Time = "Stunned", Timer = 2.0},
 
 	Punching = {Time = "Idle", Timer = 0.3},
 	Kicking = {Time = "Idle", Timer = 0.5},
@@ -25,11 +25,9 @@ Character.static.states = {
 	Uppercut = {Time = "FallingAfterPunch", Timer = 0.5},
 	UppercutSecondJump = {Time = "FallingAgainAfterPunch", Timer = 0.5},
 	JumpingKick = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", Time = "Falling", Timer = 1},
+
 	Stunned = {Time = "Idle", Timer = 0.75}
 }
-
-Character.static.movingStates = {"Idle", "Moving", "Falling", "FallingAgain"}
-Character.static.jumpingStates = {"Idle", "Moving", "Falling"}
 
 Character.static.spritesFolders = {
     Idle = "idle",
@@ -87,25 +85,29 @@ function Character:initialize(name, x, y)
 
     self.actions = {
         right = function ()
-            if self:canMove() then
+            if self.automate:applyEvent("move") then
                 local _,y = self.body:getLinearVelocity()
                 self.body:setLinearVelocity(self.speed, y)
                 self.facingRight = true
-                return self.automate:applyEvent("move")
+                return true
+            else
+                return false
             end
         end,
 
         left = function ()
-            if self:canMove() then
+            if self.automate:applyEvent("move") then
                 local _,y = self.body:getLinearVelocity()
                 self.body:setLinearVelocity(-self.speed, y)
                 self.facingRight = false
-                return self.automate:applyEvent("move")
+                return true
+            else
+                return false
             end
         end,
 
         jump = function ()
-            if self:canMove() and self:canJump() and self.automate:applyEvent("jump") then
+            if self.automate:applyEvent("jump") then
                 local x,y = self.body:getLinearVelocity()
                 self.body:setLinearVelocity(x, -self.jumpSpeed)
                 return true
@@ -159,7 +161,7 @@ function Character:initialize(name, x, y)
                     return self.automate:applyEvent("fall")
             end
             --check if a timer has finished
-            self.automate:applyEvent()
+            self.automate:checkTimer()
         end
     }
 
@@ -273,6 +275,7 @@ function Character:drawDebug()
     love.graphics.print("X : " .. self.body:getX() .. ", Y = " .. self.body:getY() ..
         "\nPicture Timer : " .. self.pictureTimer ..
         "\nState is : " .. self:getState() ..
-        "\nMass is : " .. self.body:getMass(),
+        "\nMass is : " .. self.body:getMass()..
+        "\nAutoTimer = " .. self.automate.lastTimer,
         self.body:getX(), self.body:getY() - 150)
 end
