@@ -9,12 +9,12 @@ Character.static.states = {
     Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned"},
     Moving = {stop="Idle", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
     Jumping = {Time = "Falling", punch = "Uppercut", kick = "JumpingKick", Timer = 0.3},
-    Falling = {hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
-    FallingAfterPunch = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
+    Falling = {move="Falling", hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
+    FallingAfterPunch = {move = "FallingAfterPunch", hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
     JumpingAgain = {Time = "FallingAgain", punch = "UppercutSecondJump", kick = "JumpingKick", Timer = 0.3},
     FallingAgain = {move = "FallingAgain", hitTheGround = "Idle", punch = "UppercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
-    FallingAgainAfterPunch = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
-    Guarding = {stop = "Idle", Time = "Stunned", Timer = 2.0},
+    FallingAgainAfterPunch = {move = "FallingAgainAfterPunch", hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
+    Guarding = {stop = "Idle"},
     Punching = {punch = "Punching2",timer = 0.3, Time = "Idle", Timer = 0.3},
     Punching2 = {punch = "PunchingFinal", timer = 0.3, Time = "Idle", Timer = 0.3},
     PunchingFinal = {Time = "Idle", Timer = 0.5},
@@ -45,10 +45,8 @@ Character.static.spritesFolders = {
     Kicking = "kick",
     KickingForward = "kick",
     JumpingKick = "kick",
-
     Punching = "punch",
     PunchingForward = "punch",
-
     Uppercut = "punch",
     UppercutSecondJump = "punch",
 
@@ -70,11 +68,13 @@ function Character:initialize(name, x, y)
     self.jumpSpeed = 500
 
     self.automate = Automate(Character.states, "Idle")
+    self.lastState = "Idle"
 
 --sets the inputs and their actions
     self.punctualInputs = {
         z  = "jump",
-        i = "punch"
+        i = "punch",
+        k = "kick"
     }
 
     self.continuousInputs = {
@@ -124,7 +124,19 @@ function Character:initialize(name, x, y)
         end,
 
         punch = function ()
-            return false
+            if self.automate:applyEvent("punch") then
+                return true
+            else
+                return false
+            end
+        end,
+
+        kick = function ()
+            if self.automate:applyEvent("kick") then
+                return true
+            else
+                return false
+            end
         end,
 
         stop = function ()
@@ -153,15 +165,18 @@ function Character:initialize(name, x, y)
 
         default = function ()
             local x, y, dx, dy = self.body:getX(), self.body:getY(), self.body:getLinearVelocity()
-            if self:getState() == "Falling" or self:getState() == "FallingAgain" then
+            local state = self:getState()
+            local result = false
+            if Character.states[state]["hitTheGround"]  then
                 if dy == 0 then
-                    return self:applyAction("hitTheGround")
+                    result = result or self:applyAction("hitTheGround")
                 end
             elseif dy > 0 then
-                    return self.automate:applyEvent("fall")
+                result = result or self.automate:applyEvent("fall")
             end
             --check if a timer has finished
-            self.automate:checkTimer()
+            result = result or self.automate:checkTimer()
+            return result
         end
     }
 
@@ -210,7 +225,8 @@ end
 
 -- applies the action on the character
 function Character:applyAction(action)
-    if self.actions[action]() then --if the state has changed
+    if self.actions[action]() and self:getState() ~= self.lastState then --if the state has changed
+        self.lastState = self:getState()
         self:loadAnimation()
     end
 end
@@ -218,6 +234,7 @@ end
 function Character:getState()
     return self.automate.currentState
 end
+
 
 function Character:getNextState()
     return self.automate.nextState
@@ -250,7 +267,6 @@ function Character:loadAnimation()
 end
 
 function Character:getCurrentPicture()
-    currentState = self:getState()
     return self.sprites[Character.spritesFolders[self:getState()]][self.currentPic]
 end
 
@@ -277,7 +293,7 @@ end
 function Character:drawDebug()
     love.graphics.polygon("line", self.body:getWorldPoints(self.shape:getPoints()))
     love.graphics.print("X : " .. self.body:getX() .. ", Y = " .. self.body:getY() ..
-        "\nPicture Timer : " .. self.pictureTimer ..
+        "\nPicture Number : " .. self.currentPic ..
         "\nState is : " .. self:getState() ..
         "\nMass is : " .. self.body:getMass()..
         "\nAutoTimer = " .. self.automate.lastTimer ..

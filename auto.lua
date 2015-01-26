@@ -8,7 +8,6 @@ function Automate:initialize(states, state) -- Initalisation Automate
 end
 
 function Automate:applyEvent(event) --returns true if the state has changed
-    local lastState = self.currentState
     if event then -- an event has been 
         local newState = self.states[self.currentState][event]
         if newState then -- we check if there is a state corresponding to the event
