@@ -4,9 +4,6 @@ Character = class('Character')
 
 Character.static.width = 64
 Character.static.height = 128
-Character.static.quad = love.graphics.newQuad(0, 0, Character.width, Character.height, Character.width, Character.height)
-Character.static.movingStates = {"Idle", "Moving", "Falling", "FallingAgain"}
-Character.static.jumpingStates = {"Idle", "Moving", "Falling"}
 
 Character.static.states = {
     Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned"},
@@ -28,6 +25,19 @@ Character.static.states = {
 	Stunned = {Time = "Idle", Timer = 0.75}
 }
 
+Character.static.movingStates = {"Idle", "Moving", "Falling", "FallingAgain"}
+Character.static.jumpingStates = {"Idle", "Moving", "Falling"}
+
+Character.static.spritesFolders = {
+    Idle = "idle",
+    Moving = "move",
+    Jumping = "jump",
+    Falling = "jump",
+    JumpingAgain = "jump",
+    FallingAgain = "jump",
+    Guarding = "guard"
+}
+
 function Character:initialize(name, x, y)
     self.name = name
 
@@ -39,7 +49,8 @@ function Character:initialize(name, x, y)
     self.body:setFixedRotation(true)
     self.fixture:setFriction(0)
 
-    self.speed = 100
+    self.speed = 200
+    self.jumpSpeed = 500
 
     self.automate = Automate(Character.states, "Idle")
 
@@ -77,13 +88,14 @@ function Character:initialize(name, x, y)
         jump = function ()
             if self:canMove() and self:canJump() and self.automate:applyEvent("jump") then
                 local x,y = self.body:getLinearVelocity()
-                self.body:setLinearVelocity(x, -300)
+                self.body:setLinearVelocity(x, -self.jumpSpeed)
                 return true
             end
         end,
 
         guard = function ()
-            return false
+            self:applyAction("stop")
+            return self.automate:applyEvent("guard")
         end,
 
         punch = function ()
@@ -105,7 +117,7 @@ function Character:initialize(name, x, y)
         end,
 
         noInput = function ()
-            if self:getState() == "Moving" then
+            if self:getState() == "Moving" or self:getState() == "Guarding" then
                 return self:applyAction("stop")
             end
         end,
@@ -133,15 +145,6 @@ function Character:initialize(name, x, y)
                 love.graphics.newImage(graphicsFolder .. "/" .. name .. "/" .. folder .. "/" .. picture))
         end
     end
-
-    self.spritesFolders = {
-        Idle = "idle",
-        Moving = "move",
-        Jumping = "jump",
-        Falling = "jump",
-        JumpingAgain = "jump",
-        FallingAgain = "jump"
-    }
 
     self.facingRight = true
 
@@ -215,7 +218,7 @@ end
 
 function Character:getCurrentPicture()
     currentState = self:getState()
-    return self.sprites[self.spritesFolders[self:getState()]][self.currentPic]
+    return self.sprites[Character.spritesFolders[self:getState()]][self.currentPic]
 end
 
 --updates the picture to draw regarding the timer set for the current one
@@ -223,7 +226,7 @@ function Character:updatePicture(dt)
     self.pictureTimer = self.pictureTimer + dt
     if self.pictureTimer > self.pictureDuration then
         self.pictureTimer = 0
-        self.currentPic = self.currentPic % table.getn(self.sprites[self.spritesFolders[self:getState()]]) + 1
+        self.currentPic = self.currentPic % table.getn(self.sprites[Character.spritesFolders[self:getState()]]) + 1
     end
 end
 
@@ -231,8 +234,10 @@ function Character:draw()
     love.graphics.setColor(255,255,255,255)
     local flipped
     if self.facingRight then flipped = 1 else flipped = -1 end
-    love.graphics.draw(self:getCurrentPicture(), Character.quad,
-        self.body:getX() - (flipped * Character.width/2), self.body:getY() - Character.height/2, rotation, flipped, 1)
+    love.graphics.draw(self:getCurrentPicture(), 
+        self.body:getX() - (flipped * Character.width/2),
+        self.body:getY() - Character.height/2,
+        0, flipped, 1)
 end
 
 --in case of debugging, display some useful informations
