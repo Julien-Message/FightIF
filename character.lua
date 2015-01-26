@@ -16,7 +16,7 @@ Character.static.states = {
     FallingAgain = {move = "FallingAgain", hitTheGround = "Idle", punch = "UppercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
 	FallingAgainAfterPunch = {move = "FallingAgainAfterPunch", hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
 
-	Guarding = {stop = "Idle", jump = "Jumping", move = "Moving", punch = "Punching", Time = "Stunned", Timer = 2.0},
+	Guarding = {stop = "Idle", Time = "Stunned", Timer = 2.0},
 
 	Punching = {Time = "Idle", Timer = 0.3},
 	Kicking = {Time = "Idle", Timer = 0.5},
