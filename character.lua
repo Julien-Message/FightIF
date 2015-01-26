@@ -4,29 +4,18 @@ Character = class('Character')
 
 Character.static.width = 64
 Character.static.height = 128
+Character.static.movingStates = {"Idle", "Moving", "Falling", "FallingAgain"}
+Character.static.jumpingStates = {"Idle", "Moving", "Falling"}
 
 Character.static.states = {
-    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", stunningPunch = "Stunned"},
-    Moving = {stop="Idle", jump = "Jumping", fall = "Falling", punch = "Punching", guard = "Guarding", stunningPunch = "Stunned"},
+    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", Guard = "Guarding", Punch = "Punching", stunningPunch = "Stunned"},
+    Moving = {stop="Idle", jump = "Jumping", fall = "Falling", Punch = "Punching", Guard = "Guarding", stunningPunch = "Stunned"},
     Jumping = {Time = "Falling", Timer = 0.3},
     Falling = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
     JumpingAgain = {Time = "FallingAgain", Timer = 0.3},
     FallingAgain = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
-	Guarding = {stop = "Idle", jump = "Jumping", move = "Moving", punch = "Punching" },
+	Guarding = {stop = "Idle", jump = "Jumping", move = "Moving", Punch = "Punching" },
 	Stunned = {Time = "Idle", Timer = 0.75}
-}
-
-Character.static.movingStates = {"Idle", "Moving", "Falling", "FallingAgain"}
-Character.static.jumpingStates = {"Idle", "Moving", "Falling"}
-
-Character.static.spritesFolders = {
-    Idle = "idle",
-    Moving = "move",
-    Jumping = "jump",
-    Falling = "jump",
-    JumpingAgain = "jump",
-    FallingAgain = "jump",
-    Guarding = "guard"
 }
 
 function Character:initialize(name, x, y)
@@ -85,8 +74,7 @@ function Character:initialize(name, x, y)
         end,
 
         guard = function ()
-            self:applyAction("stop")
-            return self.automate:applyEvent("guard")
+            return false
         end,
 
         punch = function ()
@@ -108,7 +96,7 @@ function Character:initialize(name, x, y)
         end,
 
         noInput = function ()
-            if self:getState() == "Moving" or self:getState() == "Guarding" then
+            if self:getState() == "Moving" then
                 return self:applyAction("stop")
             end
         end,
@@ -136,6 +124,15 @@ function Character:initialize(name, x, y)
                 love.graphics.newImage(graphicsFolder .. "/" .. name .. "/" .. folder .. "/" .. picture))
         end
     end
+
+    self.spritesFolders = {
+        Idle = "idle",
+        Moving = "move",
+        Jumping = "jump",
+        Falling = "jump",
+        JumpingAgain = "jump",
+        FallingAgain = "jump"
+    }
 
     self.facingRight = true
 
@@ -209,7 +206,7 @@ end
 
 function Character:getCurrentPicture()
     currentState = self:getState()
-    return self.sprites[Character.spritesFolders[self:getState()]][self.currentPic]
+    return self.sprites[self.spritesFolders[self:getState()]][self.currentPic]
 end
 
 --updates the picture to draw regarding the timer set for the current one
@@ -217,7 +214,7 @@ function Character:updatePicture(dt)
     self.pictureTimer = self.pictureTimer + dt
     if self.pictureTimer > self.pictureDuration then
         self.pictureTimer = 0
-        self.currentPic = self.currentPic % table.getn(self.sprites[Character.spritesFolders[self:getState()]]) + 1
+        self.currentPic = self.currentPic % table.getn(self.sprites[self.spritesFolders[self:getState()]]) + 1
     end
 end
 
