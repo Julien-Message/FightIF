@@ -39,6 +39,8 @@ Character.static.spritesFolders = {
     Falling = "jump",
     JumpingAgain = "jump",
     FallingAgain = "jump",
+    FallingAfterPunch = "jump",
+    FallingAgainAfterPunch = "jump",
 
     Guarding = "guard",
 
@@ -48,6 +50,7 @@ Character.static.spritesFolders = {
 
     Punching = "punch",
     PunchingForward = "punch",
+
     Uppercut = "punch",
     UppercutSecondJump = "punch",
 
