@@ -20,7 +20,7 @@ Character.static.states = {
     
     Guarding = {stop = "Idle"},
     
-    Punching = {punch = "Punching2", kick = "Kicking2", timer = 10, Time = "Idle", Timer = 0.3},
+    Punching = {punch = "Punching2", kick = "Kicking2", timer = 0.3, Time = "Idle", Timer = 0.3},
     Punching2 = {punch = "PunchingFinal", kick = "KickingFinal", timer = 0.3, Time = "Idle", Timer = 0.3},
     PunchingFinal = {Time = "Idle", Timer = 0.5},
     
