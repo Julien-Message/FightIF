@@ -3,7 +3,7 @@ Automate = class('Automate') -- class Automate
 function Automate:initialize(states, state) -- Initalisation Automate
     self.states = states
     self.currentState = state
-	self.nextState = state
+    self.nextState = state
     self.lastTimer = love.timer.getTime()
 end
 
@@ -12,7 +12,8 @@ function Automate:applyEvent(event) --returns true if the state has changed
     if event then -- an event has been 
         local newState = self.states[self.currentState][event]
         if newState then -- we check if there is a state corresponding to the event
-			self.currentState = newState
+            self.nextState = newState
+            self.currentState = newState
             if self.states[self.currentState]["Timer"] then
                 self.lastTimer = love.timer.getTime()
             end
@@ -24,11 +25,22 @@ end
 
 function Automate:checkTimer()
     if self.states[self.currentState]["Timer"]  -- we just check if a timer is finished
-        and (love.timer.getTime() - self.lastTimer) > self.states[self.currentState]["Timer"] then
+        and (love.timer.getTime() - self.lastTimer) > self.states[self.currentState]["Timer"]
+        and self.nextState == self.currentState then
         self.currentState = self.states[self.currentState]["Time"]
         self.lastTimer = love.timer.getTime()
+        self.nextState = self.currentState
         return true
     else
-        return false
+        if self.states[self.currentState]["timer"]
+            and (love.timer.getTime() - self.lastTimer) > self.states[self.currentState]["Timer"]
+            and self.nextState ~= self.currentState then
+            self.currentState = self.nextState
+            self.lastTimer = love.timer.getTime()
+            self.nextState = self.currentState
+            return true
+        else
+            return false
+        end
     end
 end

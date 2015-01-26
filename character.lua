@@ -7,26 +7,26 @@ Character.static.height = 128
 
 Character.static.states = {
     Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned"},
-    Moving = {move = "Moving", stop="Idle", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
-
+    Moving = {stop="Idle", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
     Jumping = {Time = "Falling", punch = "Uppercut", kick = "JumpingKick", Timer = 0.3},
-    Falling = {move = "Falling", hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
-	FallingAfterPunch = {move = "FallingAfterPunch", hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
+    Falling = {hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
+    FallingAfterPunch = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
     JumpingAgain = {Time = "FallingAgain", punch = "UppercutSecondJump", kick = "JumpingKick", Timer = 0.3},
-    FallingAgain = {move = "FallingAgain", hitTheGround = "Idle", punch = "UppercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
-	FallingAgainAfterPunch = {move = "FallingAgainAfterPunch", hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
-
-	Guarding = {stop = "Idle", jump = "Jumping", move = "Moving", punch = "Punching", Time = "Stunned", Timer = 2.0},
-
-	Punching = {Time = "Idle", Timer = 0.3},
-	Kicking = {Time = "Idle", Timer = 0.5},
-	PunchingForward = {Time = "Moving", Timer = 0.3},
-	KickingForward = {Time = "Moving", Timer = 0.3},
-	Uppercut = {Time = "FallingAfterPunch", Timer = 0.5},
-	UppercutSecondJump = {Time = "FallingAgainAfterPunch", Timer = 0.5},
-	JumpingKick = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", Time = "Falling", Timer = 1},
-
-	Stunned = {Time = "Idle", Timer = 0.75}
+    FallingAgain = {hitTheGround = "Idle", punch = "UppercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
+    FallingAgainAfterPunch = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
+    Guarding = {stop = "Idle", jump = "Jumping", move = "Moving", punch = "Punching" },
+    Punching = {punch = "Punching2",timer = 0.3, Time = "Idle", Timer = 0.3},
+    Punching2 = {punch = "PunchingFinal", timer = 0.3, Time = "Idle", Timer = 0.3},
+    PunchingFinal = {Time = "Idle", Timer = 0.5},
+    Kicking = {kick = "Kicking2", timer = 0.5, Time = "Idle", Timer = 0.5},
+    Kicking2 = {kick = "KickingFinal", timer = 0.5, Time = "Idle", Timer = 0.5},
+    KickingFinal = {Time = "Idle", Timer = 0.7},
+    PunchingForward = {Time = "Moving", Timer = 0.3},
+    KickingForward = {Time = "Moving", Timer = 0.3},
+    Uppercut = {Time = "FallingAfterPunch", Timer = 0.5},
+    UppercutSecondJump = {Time = "FallingAgainAfterPunch", Timer = 0.5},
+    JumpingKick = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", Time = "Falling", Timer = 1},
+    Stunned = {Time = "Idle", Timer = 0.75}
 }
 
 Character.static.spritesFolders = {
@@ -219,6 +219,10 @@ function Character:getState()
     return self.automate.currentState
 end
 
+function Character:getNextState()
+    return self.automate.nextState
+end
+
 function Character:canMove()
     local currentState = self:getState()
     for _,state in ipairs(Character.movingStates) do
@@ -276,6 +280,7 @@ function Character:drawDebug()
         "\nPicture Timer : " .. self.pictureTimer ..
         "\nState is : " .. self:getState() ..
         "\nMass is : " .. self.body:getMass()..
-        "\nAutoTimer = " .. self.automate.lastTimer,
+        "\nAutoTimer = " .. self.automate.lastTimer ..
+		"\nnextState is :" .. self:getNextState(),
         self.body:getX(), self.body:getY() - 150)
 end
