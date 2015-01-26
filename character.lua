@@ -53,9 +53,14 @@ Character.static.spritesFolders = {
     Guarding = "guard",
 
     Kicking = "kick",
+    Kicking2 = "kick",
+    KickingFinal = "kick",
     KickingForward = "kick",
     JumpingKick = "kick",
+
     Punching = "punch",
+    Punching2 = "punch",
+    PunchingFinal = "punch",
     PunchingForward = "punch",
     Uppercut = "punch",
     UppercutSecondJump = "punch",
