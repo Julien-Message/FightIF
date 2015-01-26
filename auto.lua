@@ -11,10 +11,13 @@ function Automate:applyEvent(event) --returns true if the state has changed
     if event then -- an event has been 
         local newState = self.states[self.currentState][event]
         if newState then -- we check if there is a state corresponding to the event
-            self.nextState = newState
-            self.currentState = newState
-            if self.states[self.currentState]["Timer"] then
-                self.lastTimer = love.timer.getTime()
+            if self.states[self.currentState]["timer"] then  -- Check if there is a minimum time to stay in that state.
+                self.nextState = newState
+            else
+                self.currentState = newState
+                if self.states[self.currentState]["Timer"] then
+                    self.lastTimer = love.timer.getTime()
+                end
             end
             return true
         end
@@ -32,7 +35,7 @@ function Automate:checkTimer()
         return true
     else
         if self.states[self.currentState]["timer"]
-            and (love.timer.getTime() - self.lastTimer) > self.states[self.currentState]["Timer"]
+            and (love.timer.getTime() - self.lastTimer) > self.states[self.currentState]["timer"]
             and self.nextState ~= self.currentState then
             self.currentState = self.nextState
             self.lastTimer = love.timer.getTime()
