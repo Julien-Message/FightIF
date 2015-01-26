@@ -63,6 +63,103 @@ Character.static.spritesFolders = {
     Stunned = "stun"
 }
 
+Character.static.actions = {
+    right = function (character)
+        if character.automate:applyEvent("move") then
+            local _,y = character.body:getLinearVelocity()
+            character.body:setLinearVelocity(character.speed, y)
+            character.facingRight = true
+            return true
+        else
+            return false
+        end
+    end,
+
+    left = function (character)
+        if character.automate:applyEvent("move") then
+            local _,y = character.body:getLinearVelocity()
+            character.body:setLinearVelocity(-character.speed, y)
+            character.facingRight = false
+            return true
+        else
+            return false
+        end
+    end,
+
+    jump = function (character)
+        if character.automate:applyEvent("jump") then
+            local x,y = character.body:getLinearVelocity()
+            character.body:setLinearVelocity(x, -character.jumpSpeed)
+            return true
+        end
+    end,
+
+    guard = function (character)
+        if character.automate:applyEvent("guard") then
+            character.body:setLinearVelocity(0,0)
+            return true
+        else
+            return false
+        end
+    end,
+
+    punch = function (character)
+        if character.automate:applyEvent("punch") then
+            return true
+        else
+            return false
+        end
+    end,
+
+    kick = function (character)
+        if character.automate:applyEvent("kick") then
+            return true
+        else
+            return false
+        end
+    end,
+
+    stop = function (character)
+        if character.automate:applyEvent("stop") then
+            character.body:setLinearVelocity(0,0)
+            return true
+        else
+            return false
+        end
+    end,
+
+    hitTheGround = function (character)
+        local dx,_ = character.body:getLinearVelocity()
+        if dx == 0 then
+            return character.automate:applyEvent("hitTheGround")
+        else
+            return character.automate:applyEvent("hitTheGroundMoving")
+        end
+    end,
+
+    noInput = function (character)
+        if character:getState() == "Moving" or character:getState() == "Guarding" then
+            return character:applyAction("stop")
+        end
+    end,
+
+    default = function (character)
+        local x, y, dx, dy = character.body:getX(), character.body:getY(), character.body:getLinearVelocity()
+        local state = character:getState()
+        local result = false
+        if Character.states[state]["hitTheGround"]  then
+            if dy == 0 then
+                result = result or character:applyAction("hitTheGround")
+            end
+        elseif dy > 0 then
+            result = result or character.automate:applyEvent("fall")
+        end
+        --check if a timer has finished
+        result = result or character.automate:checkTimer()
+        return result
+    end
+}
+
 function Character:initialize(name, x, y)
     self.name = name
 
@@ -91,103 +188,6 @@ function Character:initialize(name, x, y)
         d = "right",
         q = "left",
         s = "guard"
-    }
-
-    self.actions = {
-        right = function ()
-            if self.automate:applyEvent("move") then
-                local _,y = self.body:getLinearVelocity()
-                self.body:setLinearVelocity(self.speed, y)
-                self.facingRight = true
-                return true
-            else
-                return false
-            end
-        end,
-
-        left = function ()
-            if self.automate:applyEvent("move") then
-                local _,y = self.body:getLinearVelocity()
-                self.body:setLinearVelocity(-self.speed, y)
-                self.facingRight = false
-                return true
-            else
-                return false
-            end
-        end,
-
-        jump = function ()
-            if self.automate:applyEvent("jump") then
-                local x,y = self.body:getLinearVelocity()
-                self.body:setLinearVelocity(x, -self.jumpSpeed)
-                return true
-            end
-        end,
-
-        guard = function ()
-            if self.automate:applyEvent("guard") then
-                self.body:setLinearVelocity(0,0)
-                return true
-            else
-                return false
-            end
-        end,
-
-        punch = function ()
-            if self.automate:applyEvent("punch") then
-                return true
-            else
-                return false
-            end
-        end,
-
-        kick = function ()
-            if self.automate:applyEvent("kick") then
-                return true
-            else
-                return false
-            end
-        end,
-
-        stop = function ()
-            if self.automate:applyEvent("stop") then
-                self.body:setLinearVelocity(0,0)
-                return true
-            else
-                return false
-            end
-        end,
-
-        hitTheGround = function ()
-            local dx,_ = self.body:getLinearVelocity()
-            if dx == 0 then
-                return self.automate:applyEvent("hitTheGround")
-            else
-                return self.automate:applyEvent("hitTheGroundMoving")
-            end
-        end,
-
-        noInput = function ()
-            if self:getState() == "Moving" or self:getState() == "Guarding" then
-                return self:applyAction("stop")
-            end
-        end,
-
-        default = function ()
-            local x, y, dx, dy = self.body:getX(), self.body:getY(), self.body:getLinearVelocity()
-            local state = self:getState()
-            local result = false
-            if Character.states[state]["hitTheGround"]  then
-                if dy == 0 then
-                    result = result or self:applyAction("hitTheGround")
-                end
-            elseif dy > 0 then
-                result = result or self.automate:applyEvent("fall")
-            end
-            --check if a timer has finished
-            result = result or self.automate:checkTimer()
-            return result
-        end
     }
 
     -- loads the sprites into a table for quick access
@@ -235,7 +235,7 @@ end
 
 -- applies the action on the character
 function Character:applyAction(action)
-    if self.actions[action]() and self:getState() ~= self.lastState then --if the state has changed
+    if Character.actions[action](self) and self:getState() ~= self.lastState then --if the state has changed
         self.lastState = self:getState()
         self:loadAnimation()
     end
