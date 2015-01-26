@@ -1,6 +1,7 @@
-require "auto"
+local Automate = require "auto"
+local class = require "middleclass"
 
-Character = class('Character')
+local Character = class('Character')
 
 Character.static.width = 64
 Character.static.height = 128
@@ -165,7 +166,7 @@ Character.static.actions = {
     end
 }
 
-function Character:initialize(name, x, y)
+function Character:initialize(name, x, y, _controller)
     self.name = name
 
 -- sets the physic
@@ -190,9 +191,7 @@ function Character:initialize(name, x, y)
     }
 
     self.continuousInputs = {
-        d = "right",
-        q = "left",
-        s = "guard"
+            self.automate:applyEvent()
     }
 
     -- loads the sprites into a table for quick access
@@ -204,22 +203,28 @@ function Character:initialize(name, x, y)
                 love.graphics.newImage(graphicsFolder .. "/" .. name .. "/" .. folder .. "/" .. picture))
         end
     end
+    
+    self.continuousActions = {"right", "left", "guard"}
 
     self.facingRight = true
 
     self.currentPic = 1
     self.pictureTimer = 0
     self.pictureDuration = 0.3
+
+    self.controller = _controller
+    self.controller:setCharacter(self)
 end
 
 --looks which key is down and do the necessary things
 function Character:update(dt)
+    self.controller:update()
+    
     local actionDone = false
-
-    for input, event in pairs(self.continuousInputs) do
-        if love.keyboard.isDown(input) then
+    for _,action in ipairs(self.continuousActions) do
+        if self.controller:isDemanded(action) then
             actionDone = true
-            self:applyAction(event)
+            self:applyAction(action)
         end
     end
 
@@ -231,11 +236,9 @@ function Character:update(dt)
     self:updatePicture(dt)
 end
 
---apply an interrupting input
+-- Transfer the pressed key to the controller for interpretation
 function Character:applyInput(keyPressed)
-    if self.punctualInputs[keyPressed] then
-        self:applyAction(self.punctualInputs[keyPressed])
-    end
+    self.controller:applyInput(keyPressed)
 end
 
 -- applies the action on the character
@@ -315,3 +318,5 @@ function Character:drawDebug()
         "\nnextState is :" .. self:getNextState(),
         self.body:getX(), self.body:getY() - 150)
 end
+
+return Character

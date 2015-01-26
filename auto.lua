@@ -1,4 +1,6 @@
-Automate = class('Automate') -- class Automate
+local class = require "middleclass"
+
+local Automate = class('Automate') -- class Automate
 
 function Automate:initialize(states, state) -- Initalisation Automate
     self.states = states
@@ -47,3 +49,5 @@ function Automate:checkTimer()
         end
     end
 end
+
+return Automate

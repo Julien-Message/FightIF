@@ -1,17 +1,18 @@
-class = require 'middleclass'
-require "character"
+local Character = require "character"
+local Controller = require "controller"
 
 graphicsFolder = "graphics"
 debug = true
 windowLength = 1024
 windowHeight = 768
+local characters = {}
 
 function love.keypressed(k)
     if k == 'escape' then
         love.event.quit() -- quits the program
-    elseif k == 'h' then
+    elseif k == 'f2' then
         debug = not debug -- displays debug info or not
-    elseif k == 'r' then
+    elseif k == 'f1' then
         love.load()
     else
         for _,character in ipairs(characters) do
@@ -37,9 +38,22 @@ function loadWorld()
 end
 
 function loadCharacters()
-    return {
-        Character("Mouton", 200, 400)
+    --sets the inputs and their actions
+    local punctualInputs = {
+        z  = "jump",
+        i = "punch"
     }
+
+    local continuousInputs = {
+        d = "right",
+        q = "left",
+        s = "guard"
+    }
+    local control1 = Controller(punctualInputs, continuousInputs)
+    return {
+        Character("Mouton", 100, 200, control1)
+    }
+    
 end
 
 function love.load()
