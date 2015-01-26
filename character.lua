@@ -9,11 +9,11 @@ Character.static.states = {
     Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned"},
     Moving = {stop="Idle", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
 
-    Jumping = {Time = "Falling", punch = "Upercut", kick = "JumpingKick", Timer = 0.3},
-    Falling = {hitTheGround = "Idle", punch = "Upercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
+    Jumping = {Time = "Falling", punch = "Uppercut", kick = "JumpingKick", Timer = 0.3},
+    Falling = {hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
 	FallingAfterPunch = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
-    JumpingAgain = {Time = "FallingAgain", punch = "UpercutSecondJump", kick = "JumpingKick", Timer = 0.3},
-    FallingAgain = {hitTheGround = "Idle", punch = "UpercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
+    JumpingAgain = {Time = "FallingAgain", punch = "UppercutSecondJump", kick = "JumpingKick", Timer = 0.3},
+    FallingAgain = {hitTheGround = "Idle", punch = "UppercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
 	FallingAgainAfterPunch = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
 
 	Guarding = {stop = "Idle", jump = "Jumping", move = "Moving", punch = "Punching" },
