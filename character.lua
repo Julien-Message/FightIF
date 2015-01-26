@@ -8,19 +8,22 @@ Character.static.height = 128
 Character.static.states = {
     Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned"},
     Moving = {stop="Idle", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
+
     Jumping = {Time = "Falling", punch = "Upercut", kick = "JumpingKick", Timer = 0.3},
     Falling = {hitTheGround = "Idle", punch = "Upercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
 	FallingAfterPunch = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
     JumpingAgain = {Time = "FallingAgain", punch = "UpercutSecondJump", kick = "JumpingKick", Timer = 0.3},
     FallingAgain = {hitTheGround = "Idle", punch = "UpercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
 	FallingAgainAfterPunch = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
+
 	Guarding = {stop = "Idle", jump = "Jumping", move = "Moving", punch = "Punching" },
+
 	Punching = {Time = "Idle", Timer = 0.3},
 	Kicking = {Time = "Idle", Timer = 0.5},
 	PunchingForward = {Time = "Moving", Timer = 0.3},
 	KickingForward = {Time = "Moving", Timer = 0.3},
-	Upercut = {Time = "FallingAfterPunch", Timer = 0.5},
-	UpercutSecondJump = {Time = "FallingAgainAfterPunch", Timer = 0.5},
+	Uppercut = {Time = "FallingAfterPunch", Timer = 0.5},
+	UppercutSecondJump = {Time = "FallingAgainAfterPunch", Timer = 0.5},
 	JumpingKick = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", Time = "Falling", Timer = 1},
 	Stunned = {Time = "Idle", Timer = 0.75}
 }
@@ -31,11 +34,24 @@ Character.static.jumpingStates = {"Idle", "Moving", "Falling"}
 Character.static.spritesFolders = {
     Idle = "idle",
     Moving = "move",
+
     Jumping = "jump",
     Falling = "jump",
     JumpingAgain = "jump",
     FallingAgain = "jump",
-    Guarding = "guard"
+
+    Guarding = "guard",
+
+    Kicking = "kick",
+    KickingForward = "kick",
+    JumpingKick = "kick",
+
+    Punching = "punch",
+    PunchingForward = "punch",
+    Uppercut = "punch",
+    UppercutSecondJump = "punch",
+
+    Stunned = "stun"
 }
 
 function Character:initialize(name, x, y)
