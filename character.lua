@@ -20,7 +20,7 @@ Character.static.states = {
 	Stunned = {Time = "Idle", Timer = 0.75}
 }
 
-function Character:initialize(name, x, y)
+function Character:initialize(name, x, y, _controller)
     self.name = name
 
 -- sets the physic
@@ -34,18 +34,6 @@ function Character:initialize(name, x, y)
     self.speed = 100
 
     self.automate = Automate(Character.states, "Idle")
-
---sets the inputs and their actions
-    self.punctualInputs = {
-        v  = "jump",
-        b = "punch"
-    }
-
-    self.continuousInputs = {
-        right = "right",
-        left = "left",
-        g = "guard"
-    }
 
     self.actions = {
         right = function ()
@@ -125,6 +113,8 @@ function Character:initialize(name, x, y)
                 love.graphics.newImage(graphicsFolder .. "/" .. name .. "/" .. folder .. "/" .. picture))
         end
     end
+    
+    self.continuousActions = {"right", "left", "guard"}
 
     self.spritesFolders = {
         Idle = "idle",
@@ -140,16 +130,20 @@ function Character:initialize(name, x, y)
     self.currentPic = 1
     self.pictureTimer = 0
     self.pictureDuration = 0.3
+
+    self.controller = _controller
+    self.controller:setCharacter(self)
 end
 
 --looks which key is down and do the necessary things
 function Character:update(dt)
+    self.controller:update()
+    
     local actionDone = false
-
-    for input, event in pairs(self.continuousInputs) do
-        if love.keyboard.isDown(input) then
+    for _,action in ipairs(self.continuousActions) do
+        if self.controller:isDemanded(action) then
             actionDone = true
-            self:applyAction(event)
+            self:applyAction(action)
         end
     end
 
@@ -161,11 +155,9 @@ function Character:update(dt)
     self:updatePicture(dt)
 end
 
---apply an interrupting input
-function Character:applyInput(keyPressed) -- For punctual inputs only, continuous ones are handled in character:update function.
-    if self.punctualInputs[keyPressed] then
-        self:applyAction(self.punctualInputs[keyPressed])
-    end
+-- Transfer the pressed key to the controller for interpretation
+function Character:applyInput(keyPressed)
+    self.controller:applyInput(keyPressed)
 end
 
 -- applies the action on the character
