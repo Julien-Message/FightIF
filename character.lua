@@ -4,19 +4,165 @@ Character = class('Character')
 
 Character.static.width = 64
 Character.static.height = 128
-Character.static.quad = love.graphics.newQuad(0, 0, Character.width, Character.height, Character.width, Character.height)
-Character.static.movingStates = {"Idle", "Moving", "Falling", "FallingAgain"}
-Character.static.jumpingStates = {"Idle", "Moving", "Falling"}
 
 Character.static.states = {
-    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", Guard = "Guarding", Punch = "Punching", stunningPunch = "Stunned"},
-    Moving = {stop="Idle", jump = "Jumping", fall = "Falling", Punch = "Punching", Guard = "Guarding", stunningPunch = "Stunned"},
-    Jumping = {Time = "Falling", Timer = 0.3},
-    Falling = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
-    JumpingAgain = {Time = "FallingAgain", Timer = 0.3},
-    FallingAgain = {hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
-	Guarding = {stop = "Idle", jump = "Jumping", move = "Moving", Punch = "Punching" },
-	Stunned = {Time = "Idle", Timer = 0.75}
+    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned"},
+    
+    Moving = {stop="Idle", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
+    
+    Jumping = {Time = "Falling", punch = "Uppercut", kick = "JumpingKick", Timer = 0.3},
+    Falling = {move="Falling", hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
+    FallingAfterPunch = {move = "FallingAfterPunch", hitTheGround = "Idle", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
+    
+    JumpingAgain = {Time = "FallingAgain", punch = "UppercutSecondJump", kick = "JumpingKick", Timer = 0.3},
+    FallingAgain = {move = "FallingAgain", hitTheGround = "Idle", punch = "UppercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
+    FallingAgainAfterPunch = {move = "FallingAgainAfterPunch", hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
+    
+    Guarding = {stop = "Idle"},
+    
+    Punching = {punch = "Punching2", kick = "Kicking2", timer = 0.3, Time = "Idle", Timer = 0.3},
+    Punching2 = {punch = "PunchingFinal", kick = "KickingFinal", timer = 0.3, Time = "Idle", Timer = 0.3},
+    PunchingFinal = {Time = "Idle", Timer = 0.5},
+    
+    Kicking = {kick = "Kicking2", punch = "Punching2", timer = 0.5, Time = "Idle", Timer = 0.5},
+    Kicking2 = {kick = "KickingFinal", punch = "PunchingFinal", timer = 0.5, Time = "Idle", Timer = 0.5},
+    KickingFinal = {Time = "Idle", Timer = 0.7},
+    
+    PunchingForward = {Time = "Moving", Timer = 0.3},
+    KickingForward = {Time = "Moving", Timer = 0.3},
+    
+    Uppercut = {Time = "FallingAfterPunch", Timer = 0.5},
+    UppercutSecondJump = {Time = "FallingAgainAfterPunch", Timer = 0.5},
+    
+    JumpingKick = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", Time = "Falling", Timer = 1},
+    
+    Stunned = {Time = "Idle", Timer = 0.75}
+}
+
+Character.static.spritesFolders = {
+    Idle = "idle",
+    Moving = "move",
+
+    Jumping = "jump",
+    Falling = "jump",
+    JumpingAgain = "jump",
+    FallingAgain = "jump",
+    FallingAfterPunch = "jump",
+    FallingAgainAfterPunch = "jump",
+
+    Guarding = "guard",
+
+    Kicking = "kick",
+    Kicking2 = "kick",
+    KickingFinal = "kick",
+    KickingForward = "kick",
+    JumpingKick = "kick",
+
+    Punching = "punch",
+    Punching2 = "punch",
+    PunchingFinal = "punch",
+    PunchingForward = "punch",
+    Uppercut = "punch",
+    UppercutSecondJump = "punch",
+
+    Stunned = "stun"
+}
+
+Character.static.actions = {
+    right = function (character)
+        if character.automate:applyEvent("move") then
+            local _,y = character.body:getLinearVelocity()
+            character.body:setLinearVelocity(character.speed, y)
+            character.facingRight = true
+            return true
+        else
+            return false
+        end
+    end,
+
+    left = function (character)
+        if character.automate:applyEvent("move") then
+            local _,y = character.body:getLinearVelocity()
+            character.body:setLinearVelocity(-character.speed, y)
+            character.facingRight = false
+            return true
+        else
+            return false
+        end
+    end,
+
+    jump = function (character)
+        if character.automate:applyEvent("jump") then
+            local x,y = character.body:getLinearVelocity()
+            character.body:setLinearVelocity(x, -character.jumpSpeed)
+            return true
+        end
+    end,
+
+    guard = function (character)
+        if character.automate:applyEvent("guard") then
+            character.body:setLinearVelocity(0,0)
+            return true
+        else
+            return false
+        end
+    end,
+
+    punch = function (character)
+        if character.automate:applyEvent("punch") then
+            return true
+        else
+            return false
+        end
+    end,
+
+    kick = function (character)
+        if character.automate:applyEvent("kick") then
+            return true
+        else
+            return false
+        end
+    end,
+
+    stop = function (character)
+        if character.automate:applyEvent("stop") then
+            character.body:setLinearVelocity(0,0)
+            return true
+        else
+            return false
+        end
+    end,
+
+    hitTheGround = function (character)
+        local dx,_ = character.body:getLinearVelocity()
+        if dx == 0 then
+            return character.automate:applyEvent("hitTheGround")
+        else
+            return character.automate:applyEvent("hitTheGroundMoving")
+        end
+    end,
+
+    noInput = function (character)
+        if character:getState() == "Moving" or character:getState() == "Guarding" then
+            return character:applyAction("stop")
+        end
+    end,
+
+    default = function (character)
+        local x, y, dx, dy = character.body:getX(), character.body:getY(), character.body:getLinearVelocity()
+        local state = character:getState()
+        local result = false
+        if Character.states[state]["hitTheGround"]  then
+            if dy == 0 then
+                result = result or character:applyAction("hitTheGround")
+            end
+        elseif dy > 0 then
+            result = result or character.automate:applyEvent("fall")
+        end
+        --check if a timer has finished
+        result = result or character.automate:checkTimer()
+        return result
+    end
 }
 
 function Character:initialize(name, x, y)
@@ -30,89 +176,23 @@ function Character:initialize(name, x, y)
     self.body:setFixedRotation(true)
     self.fixture:setFriction(0)
 
-    self.speed = 100
+    self.speed = 200
+    self.jumpSpeed = 500
 
     self.automate = Automate(Character.states, "Idle")
+    self.lastState = "Idle"
 
 --sets the inputs and their actions
     self.punctualInputs = {
-        v  = "jump",
-        b = "punch"
+        z  = "jump",
+        i = "punch",
+        k = "kick"
     }
 
     self.continuousInputs = {
-        right = "right",
-        left = "left",
-        g = "guard"
-    }
-
-    self.actions = {
-        right = function ()
-            if self:canMove() then
-                local _,y = self.body:getLinearVelocity()
-                self.body:setLinearVelocity(self.speed, y)
-                self.facingRight = true
-                return self.automate:applyEvent("move")
-            end
-        end,
-
-        left = function ()
-            if self:canMove() then
-                local _,y = self.body:getLinearVelocity()
-                self.body:setLinearVelocity(-self.speed, y)
-                self.facingRight = false
-                return self.automate:applyEvent("move")
-            end
-        end,
-
-        jump = function ()
-            if self:canMove() and self:canJump() and self.automate:applyEvent("jump") then
-                local x,y = self.body:getLinearVelocity()
-                self.body:setLinearVelocity(x, -300)
-                return true
-            end
-        end,
-
-        guard = function ()
-            return false
-        end,
-
-        punch = function ()
-            return false
-        end,
-
-        stop = function ()
-            self.body:setLinearVelocity(0,0)
-            return self.automate:applyEvent("stop")
-        end,
-
-        hitTheGround = function ()
-            local dx,_ = self.body:getLinearVelocity()
-            if dx == 0 then
-                return self.automate:applyEvent("hitTheGround")
-            else
-                return self.automate:applyEvent("hitTheGroundMoving")
-            end
-        end,
-
-        noInput = function ()
-            if self:getState() == "Moving" then
-                return self:applyAction("stop")
-            end
-        end,
-
-        default = function ()
-            local x, y, dx, dy = self.body:getX(), self.body:getY(), self.body:getLinearVelocity()
-            if self:getState() == "Falling" or self:getState() == "FallingAgain" then
-                if dy == 0 then
-                    return self:applyAction("hitTheGround")
-                end
-            elseif dy > 0 then
-                    return self.automate:applyEvent("fall")
-            end
-            --check if a timer has finished
-            self.automate:applyEvent()
-        end
+        d = "right",
+        q = "left",
+        s = "guard"
     }
 
     -- loads the sprites into a table for quick access
@@ -124,15 +204,6 @@ function Character:initialize(name, x, y)
                 love.graphics.newImage(graphicsFolder .. "/" .. name .. "/" .. folder .. "/" .. picture))
         end
     end
-
-    self.spritesFolders = {
-        Idle = "idle",
-        Moving = "move",
-        Jumping = "jump",
-        Falling = "jump",
-        JumpingAgain = "jump",
-        FallingAgain = "jump"
-    }
 
     self.facingRight = true
 
@@ -169,13 +240,19 @@ end
 
 -- applies the action on the character
 function Character:applyAction(action)
-    if self.actions[action]() then --if the state has changed
+    if Character.actions[action](self) and self:getState() ~= self.lastState then --if the state has changed
+        self.lastState = self:getState()
         self:loadAnimation()
     end
 end
 
 function Character:getState()
     return self.automate.currentState
+end
+
+
+function Character:getNextState()
+    return self.automate.nextState
 end
 
 function Character:canMove()
@@ -205,8 +282,7 @@ function Character:loadAnimation()
 end
 
 function Character:getCurrentPicture()
-    currentState = self:getState()
-    return self.sprites[self.spritesFolders[self:getState()]][self.currentPic]
+    return self.sprites[Character.spritesFolders[self:getState()]][self.currentPic]
 end
 
 --updates the picture to draw regarding the timer set for the current one
@@ -214,7 +290,7 @@ function Character:updatePicture(dt)
     self.pictureTimer = self.pictureTimer + dt
     if self.pictureTimer > self.pictureDuration then
         self.pictureTimer = 0
-        self.currentPic = self.currentPic % table.getn(self.sprites[self.spritesFolders[self:getState()]]) + 1
+        self.currentPic = self.currentPic % table.getn(self.sprites[Character.spritesFolders[self:getState()]]) + 1
     end
 end
 
@@ -222,16 +298,20 @@ function Character:draw()
     love.graphics.setColor(255,255,255,255)
     local flipped
     if self.facingRight then flipped = 1 else flipped = -1 end
-    love.graphics.draw(self:getCurrentPicture(), Character.quad,
-        self.body:getX() - (flipped * Character.width/2), self.body:getY() - Character.height/2, rotation, flipped, 1)
+    love.graphics.draw(self:getCurrentPicture(), 
+        self.body:getX() - (flipped * Character.width/2),
+        self.body:getY() - Character.height/2,
+        0, flipped, 1)
 end
 
 --in case of debugging, display some useful informations
 function Character:drawDebug()
     love.graphics.polygon("line", self.body:getWorldPoints(self.shape:getPoints()))
     love.graphics.print("X : " .. self.body:getX() .. ", Y = " .. self.body:getY() ..
-        "\nPicture Timer : " .. self.pictureTimer ..
+        "\nPicture Number : " .. self.currentPic ..
         "\nState is : " .. self:getState() ..
-        "\nMass is : " .. self.body:getMass(),
+        "\nMass is : " .. self.body:getMass()..
+        "\nAutoTimer = " .. self.automate.lastTimer ..
+        "\nnextState is :" .. self:getNextState(),
         self.body:getX(), self.body:getY() - 150)
 end

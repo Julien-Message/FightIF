@@ -9,7 +9,7 @@ windowHeight = 768
 function love.keypressed(k)
     if k == 'escape' then
         love.event.quit() -- quits the program
-    elseif k == 'd' then
+    elseif k == 'h' then
         debug = not debug -- displays debug info or not
     elseif k == 'r' then
         love.load()
@@ -38,7 +38,7 @@ end
 
 function loadCharacters()
     return {
-        Character("Mouton", 100, 200)
+        Character("Mouton", 200, 400)
     }
 end
 
