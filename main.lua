@@ -41,7 +41,8 @@ function loadCharacters()
     --sets the inputs and their actions
     local punctualInputs = {
         z  = "jump",
-        i = "punch"
+        i = "punch",
+        k = "kick"
     }
 
     local continuousInputs = {
