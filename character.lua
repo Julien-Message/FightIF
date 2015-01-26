@@ -56,14 +56,14 @@ function Character:initialize(name, x, y)
 
 --sets the inputs and their actions
     self.punctualInputs = {
-        v  = "jump",
-        b = "punch"
+        z  = "jump",
+        i = "punch"
     }
 
     self.continuousInputs = {
-        right = "right",
-        left = "left",
-        g = "guard"
+        d = "right",
+        q = "left",
+        s = "guard"
     }
 
     self.actions = {
