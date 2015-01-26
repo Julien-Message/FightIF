@@ -1,6 +1,7 @@
-require "auto"
+local Automate = require "auto"
+local class = require "middleclass"
 
-Character = class('Character')
+local Character = class('Character')
 
 Character.static.width = 64
 Character.static.height = 128
@@ -161,7 +162,7 @@ function Character:update(dt)
 end
 
 --apply an interrupting input
-function Character:applyInput(keyPressed)
+function Character:applyInput(keyPressed) -- For punctual inputs only, continuous ones are handled in character:update function.
     if self.punctualInputs[keyPressed] then
         self:applyAction(self.punctualInputs[keyPressed])
     end
@@ -235,3 +236,5 @@ function Character:drawDebug()
         "\nMass is : " .. self.body:getMass(),
         self.body:getX(), self.body:getY() - 150)
 end
+
+return Character

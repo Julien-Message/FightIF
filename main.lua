@@ -1,6 +1,6 @@
-class = require 'middleclass'
-require "character"
+local Character = require "character"
 
+graphicsFolder = "graphics"
 graphicsFolder = "graphics"
 debug = true
 windowLength = 1024

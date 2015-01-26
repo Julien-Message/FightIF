@@ -1,4 +1,6 @@
-Automate = class('Automate') -- class Automate
+local class = require "middleclass"
+
+local Automate = class('Automate') -- class Automate
 
 function Automate:initialize(states, state) -- Initalisation Automate
     self.states = states
@@ -27,3 +29,5 @@ function Automate:applyEvent(event) --returns true if the state has changed
         return true
     end
 end
+
+return Automate
