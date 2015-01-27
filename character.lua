@@ -9,7 +9,7 @@ Character.static.height = 128
 Character.static.states = {
     Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned"},
     
-    Moving = {stop="Idle", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
+    Moving = {stop="Idle", move = "Moving", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
     
     Jumping = {Time = "Falling", punch = "Uppercut", kick = "JumpingKick", MaxTime = 0.3},
     Falling = {move="Falling", hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
@@ -111,6 +111,7 @@ Character.static.actions = {
 
     punch = function (character)
         if character.automate:applyEvent("punch") then
+
             return true
         else
             return false
@@ -182,17 +183,6 @@ function Character:initialize(name, x, y, _controller)
 
     self.automate = Automate(Character.states, "Idle")
     self.lastState = "Idle"
-
---sets the inputs and their actions
-    self.punctualInputs = {
-        z  = "jump",
-        i = "punch",
-        k = "kick"
-    }
-
-    self.continuousInputs = {
-            self.automate:applyEvent()
-    }
 
     -- loads the sprites into a table for quick access
     self.sprites = {}
@@ -309,7 +299,10 @@ end
 
 --in case of debugging, display some useful informations
 function Character:drawDebug()
+    love.graphics.setColor(0,255,0)
     love.graphics.polygon("line", self.body:getWorldPoints(self.shape:getPoints()))
+
+    love.graphics.setColor(0,255,0)
     love.graphics.print("X : " .. self.body:getX() .. ", Y = " .. self.body:getY() ..
         "\nPicture Number : " .. self.currentPic ..
         "\nState is : " .. self:getState() ..
