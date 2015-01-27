@@ -5,6 +5,7 @@ local Character = class('Character')
 
 Character.static.width = 64
 Character.static.height = 128
+Character.static.punchLength = 32
 
 Character.static.states = {
     Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned"},
@@ -111,7 +112,13 @@ Character.static.actions = {
 
     punch = function (character)
         if character.automate:applyEvent("punch") then
-            --verify if the opponent is close enough
+            for _,opponent in ipairs(characters) do
+                if opponent ~= character then
+                    if love.physics.getDistance(character.fixture, opponent.fixture) < Character.punchLength then
+                        opponent:applyAction("takeAHit")
+                    end
+                end
+            end
 
             return true
         else
@@ -121,6 +128,22 @@ Character.static.actions = {
 
     kick = function (character)
         if character.automate:applyEvent("kick") then
+            return true
+        else
+            return false
+        end
+    end,
+
+    takeAHit = function (character)
+        if character.automate:applyEvent("stunningPunch") then
+            return true
+        else
+            return false
+        end
+    end,
+
+    takeAStunningHit = function (character)
+        if character.automate:applyEvent("stunningPunch") then
             return true
         else
             return false

@@ -3,9 +3,9 @@ local Controller = require "controller"
 
 graphicsFolder = "graphics"
 debug = true
-windowLength = 1024
-windowHeight = 768
-local characters = {}
+local windowLength = 1024
+local windowHeight = 768
+characters = {}
 
 function love.keypressed(k)
     if k == 'escape' then
@@ -32,7 +32,7 @@ function loadGround()
 end
 
 function loadWorld()
-    scale = 64 --pixels per meter
+    local scale = 64 --pixels per meter
     love.physics.setMeter(scale)
     world = love.physics.newWorld(0, 15*scale, true) -- Unfortunately, we're not in space, so gravity
     loadGround()
@@ -53,19 +53,25 @@ function loadCharacters()
     }
     local control1 = Controller(punctualInputs, continuousInputs)
     return {
-        Character("Mouton", 100, 200, control1)
+        Character("Mouton", 200, 100, control1),
+        Character("Mouton", 600, 100, Controller({},{}))
     }
     
 end
 
 function beginContact(fixture1, fixture2, contact)
-    if fixture1 == ground.fixture then
-        if fixture2 == characters[1].fixture then
-            characters[1]:applyAction("hitTheGround")
+    if fixture1 == ground.fixture or fixture2 == ground.fixture then
+        local characterFixture
+        if fixture1 == ground.fixture then
+            characterFixture = fixture2
+        else
+            characterFixture = fixture2
         end
-    elseif fixture2 == ground.fixture then
-        if fixture1 == characters[1].fixture then
-            characters[1]:applyAction("hitTheGround")
+
+        for _,character in ipairs(characters) do
+            if characterFixture == character.fixture then
+                character:applyAction("hitTheGround")
+            end
         end
     end
 end
