@@ -54,17 +54,17 @@ Character.static.spritesFolders = {
     Guarding = "guard",
 
     Kicking = "kick",
-    Kicking2 = "kick",
+    Kicking2 = "kick2",
     KickingFinal = "kick",
-    KickingForward = "kick",
-    JumpingKick = "kick",
+    KickingForward = "kick2",
+    JumpingKick = "kick2",
 
     Punching = "punch",
-    Punching2 = "punch",
+    Punching2 = "punch2",
     PunchingFinal = "punch",
-    PunchingForward = "punch",
-    Uppercut = "punch",
-    UppercutSecondJump = "punch",
+    PunchingForward = "punch2",
+    Uppercut = "punch2",
+    UppercutSecondJump = "punch2",
 
     Stunned = "stun"
 }
@@ -111,6 +111,8 @@ Character.static.actions = {
 
     punch = function (character)
         if character.automate:applyEvent("punch") then
+            --verify if the opponent is close enough
+
             return true
         else
             return false
