@@ -33,7 +33,7 @@ end
 function loadWorld()
     scale = 64 --pixels per meter
     love.physics.setMeter(scale)
-    world = love.physics.newWorld(0, 9.81*scale, true) -- Unfortunately, we're not in space, so gravity
+    world = love.physics.newWorld(0, 15*scale, true) -- Unfortunately, we're not in space, so gravity
     loadGround()
 end
 
@@ -57,12 +57,25 @@ function loadCharacters()
     
 end
 
+function beginContact(fixture1, fixture2, contact)
+    if fixture1 == ground.fixture then
+        if fixture2 == characters[1].fixture then
+            characters[1]:applyAction("hitTheGround")
+        end
+    elseif fixture2 == ground.fixture then
+        if fixture1 == characters[1].fixture then
+            characters[1]:applyAction("hitTheGround")
+        end
+    end
+end
+
 function love.load()
     frameTime = 0.5
     love.window.setMode(windowLength, windowHeight)
     love.window.setTitle("FightIF")
     loadWorld()
     characters = loadCharacters()
+    world:setCallbacks(beginContact)
 end
 
 function love.update(dt)

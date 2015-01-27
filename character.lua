@@ -111,7 +111,7 @@ Character.static.actions = {
 
     punch = function (character)
         if character.automate:applyEvent("punch") then
-
+            
             return true
         else
             return false
@@ -128,7 +128,6 @@ Character.static.actions = {
 
     stop = function (character)
         if character.automate:applyEvent("stop") then
-            character.body:setLinearVelocity(0,0)
             return true
         else
             return false
@@ -154,11 +153,7 @@ Character.static.actions = {
         local x, y, dx, dy = character.body:getX(), character.body:getY(), character.body:getLinearVelocity()
         local state = character:getState()
         local result = false
-        if Character.states[state]["hitTheGround"]  then
-            if dy == 0 then
-                result = result or character:applyAction("hitTheGround")
-            end
-        elseif Character.states[state]["fall"] and dy > 0 then
+        if Character.states[state]["fall"] and dy > 0 then
             result = result or character.automate:applyEvent("fall")
         end
         --check if a timer has finished
@@ -174,9 +169,15 @@ function Character:initialize(name, x, y, _controller)
     self.body = love.physics.newBody(world, x, y, "dynamic")
     self.shape = love.physics.newRectangleShape( Character.width, Character.height )
     self.fixture = love.physics.newFixture(self.body, self.shape)
+    self.fixture:setCategory(1)
+
+    -- self.punchBody = love.physics.newBody(world, x, y, "static")
+    -- self.punchShape = love.physics.newRectangleShape( Character.width, Character.height )
+    -- self.punchFixture = love.physics.newFixture(self.punchBody, self.punchShape)
+    -- self.punchFixture:setCategory(2)
 
     self.body:setFixedRotation(true)
-    self.fixture:setFriction(0)
+    self.fixture:setFriction(2)
 
     self.speed = 200
     self.jumpSpeed = 500
