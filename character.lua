@@ -33,10 +33,10 @@ Character.static.states = {
     PunchingForward = {Time = "Moving", MaxTime = 0.3},
     KickingForward = {Time = "Moving", MaxTime = 0.3},
     
-    Uppercut = {Time = "FallingAfterPunch", MaxTime = 0.5},
-    UppercutSecondJump = {Time = "FallingAgainAfterPunch", MaxTime = 0.5},
+    Uppercut = {Time = "FallingAfterPunch", MaxTime = 0.5, hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
+    UppercutSecondJump = {Time = "FallingAgainAfterPunch", MaxTime = 0.5, hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
     
-    JumpingKick = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", Time = "Falling", MaxTime = 1},
+    JumpingKick = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", Time = "Falling", MaxTime = 1, hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
     
     Stunned = {Time = "Idle", MaxTime = 0.75}
 }
@@ -75,7 +75,7 @@ Character.static.actions = {
         if character.automate:applyEvent("move") then
             local _,y = character.body:getLinearVelocity()
             character.body:setLinearVelocity(character.speed, y)
-            character.facingRight = true
+            --character.facingRight = true
             return true
         else
             return false
@@ -86,7 +86,7 @@ Character.static.actions = {
         if character.automate:applyEvent("move") then
             local _,y = character.body:getLinearVelocity()
             character.body:setLinearVelocity(-character.speed, y)
-            character.facingRight = false
+            --character.facingRight = false
             return true
         else
             return false
@@ -152,6 +152,7 @@ Character.static.actions = {
 
     stop = function (character)
         if character.automate:applyEvent("stop") then
+            --character.body:setLinearVelocity(0,0)
             return true
         else
             return false
@@ -177,8 +178,13 @@ Character.static.actions = {
         local x, y, dx, dy = character.body:getX(), character.body:getY(), character.body:getLinearVelocity()
         local state = character:getState()
         local result = false
-        if Character.states[state]["fall"] and dy > 0 then
-            result = result or character.automate:applyEvent("fall")
+
+        if Character.states[state]["fall"] and dy > 10 then
+           result = result or character.automate:applyEvent("fall")
+        end
+
+        if state == "Idle" or Character.states[state]["hitTheGround"] then
+            character.body:setLinearVelocity(dx * 0.9, dy)
         end
         --check if a timer has finished
         result = result or character.automate:checkTimer()
@@ -191,10 +197,10 @@ function Character:initialize(name, x, y, _controller)
 
 -- sets the physic
     self.body = love.physics.newBody(world, x, y, "dynamic")
-    self.shape = love.physics.newRectangleShape( Character.width, Character.height )
+    self.shape = love.physics.newRectangleShape(Character.width, Character.height)
     self.fixture = love.physics.newFixture(self.body, self.shape)
     self.body:setFixedRotation(true)
-    self.fixture:setFriction(1)
+    self.fixture:setFriction(0)
 
     self.speed = 200
     self.jumpSpeed = 500
@@ -227,6 +233,7 @@ end
 --looks which key is down and do the necessary things
 function Character:update(dt)
     self.controller:update()
+    self:applyAction("default")
     
     local actionDone = false
     for _,action in ipairs(self.continuousActions) do
@@ -239,7 +246,6 @@ function Character:update(dt)
     if not actionDone then
         self:applyAction("noInput")
     end
-    self:applyAction("default")
 
     self:updatePicture(dt)
 end

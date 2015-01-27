@@ -97,6 +97,14 @@ function love.draw()
     love.graphics.setColor(72, 160, 14)
     love.graphics.polygon("fill", ground.body:getWorldPoints(ground.shape:getPoints()))
 
+    if characters[1].body:getX() < characters[2].body:getX() then
+        characters[1].facingRight = true
+        characters[2].facingRight = false
+    else
+        characters[1].facingRight = false
+        characters[2].facingRight = true
+    end
+
     for _,character in ipairs(characters) do
         if debug then
             character:drawDebug()
