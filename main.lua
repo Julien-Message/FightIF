@@ -28,6 +28,7 @@ function loadGround()
     ground.body = love.physics.newBody(world, windowLength/2, windowHeight-height/2, "static") --remember, the shape anchors to the body from its center
     ground.shape = love.physics.newRectangleShape(width, height) --make a rectangle with a width of 650 and a height of 50
     ground.fixture = love.physics.newFixture(ground.body, ground.shape) --attach shape to body
+    ground.fixture:setFriction(5)
 end
 
 function loadWorld()
