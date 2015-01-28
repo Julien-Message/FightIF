@@ -2,23 +2,159 @@ local class = require "middleclass"
 
 local Automate = class('Automate') -- class Automate
 
-function Automate:initialize(states, state) -- Initalisation Automate
-    self.states = states
-    self.currentState = state
-    self.nextState = state
+Automate.static.punchLength = 32
+
+Automate.static.states = {
+    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", hit = "Idle", stunningHit = "Stunned"},
+    
+    Moving = {stop="Idle", move = "Moving", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", hit = "Idle", stunningHit = "Stunned"},
+    
+    Jumping = {Time = "Falling", punch = "Uppercut", kick = "JumpingKick", MaxTime = 0.3},
+    Falling = {move="Falling", hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", jump = "JumpingAgain"},
+    FallingAfterPunch = {move = "FallingAfterPunch", hitTheGround = "Idle", jump = "JumpingAgain"},
+    
+    JumpingAgain = {Time = "FallingAgain", punch = "UppercutSecondJump", kick = "JumpingKick", MaxTime = 0.3},
+    FallingAgain = {move = "FallingAgain", hitTheGround = "Idle", punch = "UppercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
+    FallingAgainAfterPunch = {move = "FallingAgainAfterPunch", hitTheGround = "Idle"},
+    
+    Guarding = {stop = "Idle"},
+    
+    Punching = {punch = "Punching2", kick = "Kicking2", MinTime = 0.3, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.4},
+    Punching2 = {punch = "PunchingFinal", kick = "KickingFinal", MinTime = 0.3, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.4},
+    PunchingFinal = {hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
+    
+    Kicking = {kick = "Kicking2", punch = "Punching2", MinTime = 0.5, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
+    Kicking2 = {kick = "KickingFinal", punch = "PunchingFinal", MinTime = 0.5, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
+    KickingFinal = {hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.7},
+    
+    PunchingForward = {Time = "Moving", hit = "Idle", stunningHit = "Stunned", MaxTime = 0.3},
+    KickingForward = {Time = "Moving", hit = "Idle", stunningHit = "Stunned", MaxTime = 0.3},
+    
+    Uppercut = {Time = "FallingAfterPunch", MaxTime = 0.5, hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
+    UppercutSecondJump = {Time = "FallingAgainAfterPunch", MaxTime = 0.5, hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
+    
+    JumpingKick = {hitTheGround = "Idle", hitTheGroundMoving = "Moving", Time = "Falling", MaxTime = 1, hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
+    
+    Stunned = {Time = "Idle", MaxTime = 0.75}
+}
+
+Automate.static.events = {
+    right = "move",
+    left = "move",
+    jump = "jump",
+    guard = "guard",
+    punch = "punch",
+    kick = "kick",
+    takeAHit = "hit",
+    takeAStunningHit = "stunningHit",
+    hitTheGround = "hitTheGround",
+    hitTheGroundMoving = "hitTheGroundMoving",
+    noInput = "stop",
+    default = "default"
+}
+
+Automate.static.actions = {
+    right = function (character)
+        local _,y = character.body:getLinearVelocity()
+        character.body:setLinearVelocity(character.speed, y)
+    end,
+
+    left = function (character)
+        local _,y = character.body:getLinearVelocity()
+        character.body:setLinearVelocity(-character.speed, y)
+    end,
+
+    jump = function (character)
+        local x,y = character.body:getLinearVelocity()
+        character.body:setLinearVelocity(x, -character.jumpSpeed)
+    end,
+
+    guard = function (character)
+        character.body:setLinearVelocity(0,0)
+    end,
+
+    punch = function (character)
+    print(character:getState())
+        for _,opponent in ipairs(characters) do
+            if opponent ~= character then
+                if love.physics.getDistance(character.fixture, opponent.fixture) < Automate.punchLength then
+                    if character:getState() == "PunchingFinal" then
+                        opponent:applyAction("takeAStunningHit")
+                    else
+                        opponent:applyAction("takeAHit")
+                    end
+                end
+            end
+        end
+    end,
+
+    kick = function (character)
+        for _,opponent in ipairs(characters) do
+            if opponent ~= character then
+                if love.physics.getDistance(character.fixture, opponent.fixture) < Automate.punchLength then
+                    if character:getState() == "KickingFinal" then
+                        opponent:applyAction("takeAStunningHit")
+                    else
+                        opponent:applyAction("takeAHit")
+                    end
+                end
+            end
+        end
+    end,
+
+    takeAHit = function (character)
+    end,
+
+    takeAStunningHit = function (character)
+    end,
+
+    stop = function (character)
+        character.body:setLinearVelocity(0,0)
+    end,
+
+    hitTheGround = function (character)
+    end,
+
+    noInput = function (character)
+        if character:getState() == "Moving" or character:getState() == "Guarding" then
+            return character:applyAction("stop")
+        end
+    end,
+
+    default = function (character)
+        local x, y, dx, dy = character.body:getX(), character.body:getY(), character.body:getLinearVelocity()
+        local state = character:getState()
+
+        if Automate.states[state]["fall"] and dy > 10 then
+            character.automate:applyEvent("fall")
+        end
+
+        if state == "Idle" or state == "Stunned" or state == Automate.states[state]["hitTheGround"] then
+            character.body:setLinearVelocity(dx * 0.8, dy)
+        end
+        --check if a timer has finished
+        character.automate:checkTimer()
+    end
+}
+
+function Automate:initialize(character) -- Initalisation Automate
+    self.character = character
     self.lastTimer = love.timer.getTime()
+    self.currentState = "Idle"
+    self.nextAction = nil
 end
 
-function Automate:applyEvent(event) --returns true if the state has changed
-    if event then -- an event has been 
-        local newState = self.states[self.currentState][event]
+function Automate:applyAction(action)
+    if action then -- an action has been 
+        event = Automate.events[action]
+        local newState = Automate.states[self.currentState][event]
         if newState then -- we check if there is a state corresponding to the event
-            if self.states[self.currentState]["MinTime"] then  -- Check if there is a minimum time to stay in that state.
-                self.nextState = newState
-            else
+            if Automate.states[self.currentState]["MinTime"] then  -- Check if there is a minimum time to stay in that state.
+                self.nextAction = event
+            else  
                 self.currentState = newState
-                self.nextState = newState
-                if self.states[self.currentState]["MaxTime"] then
+                Automate.actions[action](self.character)
+                if Automate.states[self.currentState]["MaxTime"] then
                     self.lastTimer = love.timer.getTime()
                 end
             end
@@ -26,24 +162,27 @@ function Automate:applyEvent(event) --returns true if the state has changed
         end
     end
     return false
-end
+ end
+
+ function Automate:applyEvent(event)
+     self.currentState = Automate.states[self.currentState][event]
+ end
 
 function Automate:checkTimer()
     local result = false
-    if self.states[self.currentState]["MaxTime"]  -- we just check if a timer is finished
-        and (love.timer.getTime() - self.lastTimer) > self.states[self.currentState]["MaxTime"]
-        and self.nextState == self.currentState then
-        self.currentState = self.states[self.currentState]["Time"]
+    if Automate.states[self.currentState]["MaxTime"]  -- we just check if a timer is finished
+        and (love.timer.getTime() - self.lastTimer) > Automate.states[self.currentState]["MaxTime"] then
+        self.currentState = Automate.states[self.currentState]["Time"]
         self.lastTimer = love.timer.getTime()
-        self.nextState = self.currentState
         result = true
     end
-    if self.states[self.currentState]["MinTime"]
-        and (love.timer.getTime() - self.lastTimer) > self.states[self.currentState]["MinTime"]
-        and self.nextState ~= self.currentState then
-        self.currentState = self.nextState
+    if Automate.states[self.currentState]["MinTime"]
+        and (love.timer.getTime() - self.lastTimer) > Automate.states[self.currentState]["MinTime"]
+        and self.nextAction then
+        self:applyEvent(self.nextAction)
+        Automate.actions[self.nextAction](self.character)
+        self.nextAction = nil
         self.lastTimer = love.timer.getTime()
-        self.nextState = self.currentState
         result = true
     end
     return result
