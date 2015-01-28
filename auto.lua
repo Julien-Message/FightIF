@@ -88,7 +88,6 @@ Automate.static.actions = {
     end,
 
     kick = function (character)
-    print(character:getState())
         for _,opponent in ipairs(characters) do
             if opponent ~= character then
                 if love.physics.getDistance(character.fixture, opponent.fixture) < Automate.punchLength then
