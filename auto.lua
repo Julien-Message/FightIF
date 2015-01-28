@@ -6,9 +6,9 @@ Automate.static.punchLength = 32
 Automate.static.kickLength = 48
 
 Automate.static.states = {
-    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", takeAHit = "Idle", stunningHit = "Stunned"},
+    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", takeAHit = "Idle", takeAStunningHit = "Stunned"},
     
-    Moving = {stop="Idle", move = "Moving", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", hit = "Idle", stunningHit = "Stunned"},
+    Moving = {stop="Idle", move = "Moving", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", hit = "Idle", takeAStunningHit = "Stunned"},
     
     Jumping = {Time = "Falling", punch = "Uppercut", kick = "JumpingKick", MaxTime = 0.3},
     Falling = {move="Falling", hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", jump = "JumpingAgain"},
@@ -79,8 +79,12 @@ Automate.static.actions = {
             if opponent ~= character then
                 if love.physics.getDistance(character.fixture, opponent.fixture) < Automate.punchLength then
                     if character:getState() == "PunchingFinal" then
+                        local audio = love.audio.newSource("sounds/PowerPunch.mp3")
+                        audio:play()
                         opponent:applyAction("takeAStunningHit")
                     else
+                        local audio = love.audio.newSource("sounds/Punch.mp3")
+                        audio:play()
                         opponent:applyAction("takeAHit")
                     end
                 end
@@ -93,8 +97,12 @@ Automate.static.actions = {
             if opponent ~= character then
                 if love.physics.getDistance(character.fixture, opponent.fixture) < Automate.kickLength then
                     if character:getState() == "KickingFinal" then
+                        local audio = love.audio.newSource("sounds/PowerKick.mp3")
+                        audio:play()
                         opponent:applyAction("takeAStunningHit")
                     else
+                        local audio = love.audio.newSource("sounds/Kick.mp3")
+                        audio:play()
                         opponent:applyAction("takeAHit")
                     end
                 end
@@ -133,7 +141,7 @@ Automate.static.actions = {
             character.automate:applyEvent("fall")
         end
 
-        if state == "Idle" or state == "Stunned" or state == Automate.states[state]["hitTheGround"] then
+        if state == "Idle" or state == "Stunned" or Automate.states[state]["hitTheGround"] or Automate.states[state]["punch"] then
             character.body:setLinearVelocity(dx * 0.8, dy)
         end
         --check if a timer has finished
