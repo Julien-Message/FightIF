@@ -2,7 +2,7 @@ local Character = require "character"
 local Controller = require "controller"
 
 graphicsFolder = "graphics"
-debug = true
+debug = false
 local windowLength = 1024
 local windowHeight = 768
 
@@ -111,6 +111,7 @@ function beginContact(fixture1, fixture2, contact)
 end
 
 function love.load()
+    victory = 0
     frameTime = 0.5
     love.window.setMode(windowLength, windowHeight)
     love.window.setTitle("FightIF")

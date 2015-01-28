@@ -6,9 +6,9 @@ Automate.static.punchLength = 32
 Automate.static.kickLength = 48
 
 Automate.static.states = {
-    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", hit = "Idle", stunningHit = "Stunned"},
+    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", takeAHit = "Idle", takeAStunningHit = "Stunned"},
     
-    Moving = {stop="Idle", move = "Moving", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", hit = "Idle", stunningHit = "Stunned"},
+    Moving = {stop="Idle", move = "Moving", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", hit = "Idle", takeAStunningHit = "Stunned"},
     
     Jumping = {Time = "Falling", punch = "Uppercut", kick = "JumpingKick", MaxTime = 0.3},
     Falling = {move="Falling", hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", jump = "JumpingAgain"},
@@ -20,16 +20,16 @@ Automate.static.states = {
     
     Guarding = {stop = "Idle"},
     
-    Punching = {punch = "Punching2", kick = "Kicking2", MinTime = 0.3, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.3},
-    Punching2 = {punch = "PunchingFinal", kick = "KickingFinal", MinTime = 0.3, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.3},
-    PunchingFinal = {hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
+    Punching = {punch = "Punching2", kick = "Kicking2", MinTime = 0.3, takeAHit = "Idle", takeAStunningHit = "Stunned", Time = "Idle", MaxTime = 0.3},
+    Punching2 = {punch = "PunchingFinal", kick = "KickingFinal", MinTime = 0.3, takeAHit = "Idle", takeAStunningHit = "Stunned", Time = "Idle", MaxTime = 0.3},
+    PunchingFinal = {hit = "Idle", takeAStunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
     
-    Kicking = {kick = "Kicking2", punch = "Punching2", MinTime = 0.5, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
-    Kicking2 = {kick = "KickingFinal", punch = "PunchingFinal", MinTime = 0.5, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
-    KickingFinal = {hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.7},
+    Kicking = {kick = "Kicking2", punch = "Punching2", MinTime = 0.5, takeAHit = "Idle", takeAStunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
+    Kicking2 = {kick = "KickingFinal", punch = "PunchingFinal", MinTime = 0.5, takeAHit = "Idle", takeAStunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
+    KickingFinal = {hit = "Idle", takeAStunningHit = "Stunned", Time = "Idle", MaxTime = 0.7},
     
-    PunchingForward = {Time = "Moving", hit = "Idle", stunningHit = "Stunned", MaxTime = 0.3},
-    KickingForward = {Time = "Moving", hit = "Idle", stunningHit = "Stunned", MaxTime = 0.3},
+    PunchingForward = {Time = "Moving", takeAHit = "Idle", takeAStunningHit = "Stunned", MaxTime = 0.3},
+    KickingForward = {Time = "Moving", takeAHit = "Idle", takeAStunningHit = "Stunned", MaxTime = 0.3},
     
     Uppercut = {Time = "FallingAfterPunch", MaxTime = 0.5, hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
     UppercutSecondJump = {Time = "FallingAgainAfterPunch", MaxTime = 0.5, hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
@@ -46,8 +46,8 @@ Automate.static.events = {
     guard = "guard",
     punch = "punch",
     kick = "kick",
-    takeAHit = "hit",
-    takeAStunningHit = "stunningHit",
+    takeAHit = "takeAHit",
+    takeAStunningHit = "takeAStunningHit",
     hitTheGround = "hitTheGround",
     hitTheGroundMoving = "hitTheGroundMoving",
     noInput = "stop",
@@ -141,7 +141,7 @@ Automate.static.actions = {
             character.automate:applyEvent("fall")
         end
 
-        if state == "Idle" or state == "Stunned" or state == Automate.states[state]["hitTheGround"] then
+        if state == "Idle" or state == "Stunned" or Automate.states[state]["hitTheGround"] or Automate.states[state]["punch"] then
             character.body:setLinearVelocity(dx * 0.8, dy)
         end
         --check if a timer has finished
