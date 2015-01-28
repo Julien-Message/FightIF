@@ -102,9 +102,19 @@ Automate.static.actions = {
     end,
 
     takeAHit = function (character)
+        if not character:getState() == "Guarding" then
+            character:losePV(10)
+        else
+            character:losePV(2)
+        end
     end,
 
     takeAStunningHit = function (character)
+        if not character:getState() == "Guarding" then
+            character:losePV(20)
+        else
+            character:losePV(6)
+        end
     end,
 
 

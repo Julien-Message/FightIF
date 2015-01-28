@@ -5,6 +5,12 @@ graphicsFolder = "graphics"
 debug = true
 local windowLength = 1024
 local windowHeight = 768
+
+local barLength = 400
+local barWidth = 60
+
+local victory = 0
+
 characters = {}
 
 function love.keypressed(k)
@@ -99,16 +105,37 @@ function love.load()
 end
 
 function love.update(dt)
-    for _,character in ipairs(characters) do
-        character:update(dt)
+    if characters[1].isDead then
+        victory = 2
+    elseif characters[2].isDead then
+        victory = 1
+    else
+        for _,character in ipairs(characters) do
+            character:update(dt)
+        end
     end
     world:update(dt)
 end
 
 function love.draw()
     -- let's draw some ground
+    love.graphics.setColor(255,255,255,255)
+
     love.graphics.draw(worldBG, 0, 0)
     love.graphics.draw(arenaGround,0, windowHeight - 180 )
+
+    love.graphics.setColor(0,0,0)
+    love.graphics.rectangle("line", 49, 49, barLength + 2, barWidth + 2)
+    love.graphics.rectangle("line", windowLength - 50 - barLength - 1, 49, barLength + 2, barWidth + 2)
+
+    love.graphics.setColor(255, 255, 0)
+    love.graphics.rectangle("fill", 50, 50, barLength, barWidth)
+    love.graphics.rectangle("fill", windowLength - 50 - barLength, 50, barLength, barWidth)
+
+    love.graphics.setColor(255, 0, 0)
+    love.graphics.rectangle("fill", 50, 50, barLength * characters[1]:getPV() / Character.maxPV, barWidth)
+    love.graphics.rectangle("fill", windowLength - 50 - barLength * characters[2]:getPV() / Character.maxPV, 50, barLength * characters[2]:getPV() / Character.maxPV, barWidth)    
+
 
     if characters[1].body:getX() < characters[2].body:getX() then
         characters[1].facingRight = true
@@ -123,6 +150,11 @@ function love.draw()
             character:drawDebug()
         end
         character:draw()
+    end
+
+    if victory ~= 0 then
+        love.graphics.setColor(255,0,0)
+        love.graphics.print("Player " .. victory .. " wins !\nPress F1 to start again", 200, 300, 0, 5)
     end
 end
 

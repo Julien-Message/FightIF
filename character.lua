@@ -5,6 +5,7 @@ local Character = class('Character')
 
 Character.static.width = 64
 Character.static.height = 128
+Character.static.maxPV = 100
 
 Character.static.spritesFolders = {
     Idle = "idle",
@@ -37,7 +38,8 @@ Character.static.spritesFolders = {
 
 function Character:initialize(name, x, y, _controller)
     self.name = name
-
+    self.PV = Character.maxPV
+    self.isDead = false
 -- sets the physic
     self.body = love.physics.newBody(world, x, y, "dynamic")
     self.shape = love.physics.newPolygonShape(
@@ -134,6 +136,19 @@ function Character:updatePicture(dt)
     end
 end
 
+function Character:losePV(n)
+    if n > self.PV then
+        self.PV = 0
+        self.isDead = true
+    else
+        self.PV = self.PV - n
+    end
+end
+
+function Character:getPV()
+    return self.PV
+end
+
 function Character:draw()
     love.graphics.setColor(255,255,255,255)
     local flipped
@@ -157,5 +172,6 @@ function Character:drawDebug()
         "\nAutoTimer = " .. self.automate.lastTimer,
         self.body:getX(), self.body:getY() - 150)
 end
+
 
 return Character
