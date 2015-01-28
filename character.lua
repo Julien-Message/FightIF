@@ -183,8 +183,8 @@ Character.static.actions = {
            result = result or character.automate:applyEvent("fall")
         end
 
-        if state == "Idle" or Character.states[state]["hitTheGround"] then
-            character.body:setLinearVelocity(dx * 0.9, dy)
+        if state == "Idle" or state == "Stunned" or state == Character.states[state]["hitTheGround"] then
+            character.body:setLinearVelocity(dx * 0.8, dy)
         end
         --check if a timer has finished
         result = result or character.automate:checkTimer()
@@ -197,7 +197,12 @@ function Character:initialize(name, x, y, _controller)
 
 -- sets the physic
     self.body = love.physics.newBody(world, x, y, "dynamic")
-    self.shape = love.physics.newRectangleShape(Character.width, Character.height)
+    self.shape = love.physics.newPolygonShape(
+        0, - Character.height / 2,
+        Character.width / 2, Character.height / 4,
+        0, Character.height / 2,
+        - Character.width / 2, Character.height / 4)
+
     self.fixture = love.physics.newFixture(self.body, self.shape)
     self.body:setFixedRotation(true)
     self.fixture:setFriction(0)
@@ -218,7 +223,7 @@ function Character:initialize(name, x, y, _controller)
         end
     end
     
-    self.continuousActions = {"right", "left", "guard"}
+    self.continuousActions = {"right", "left", "guard"} 
 
     self.facingRight = true
 
