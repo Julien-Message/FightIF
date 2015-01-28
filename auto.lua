@@ -3,6 +3,7 @@ local class = require "middleclass"
 local Automate = class('Automate') -- class Automate
 
 Automate.static.punchLength = 32
+Automate.static.kickLength = 48
 
 Automate.static.states = {
     Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", hit = "Idle", stunningHit = "Stunned"},
@@ -90,7 +91,7 @@ Automate.static.actions = {
     kick = function (character)
         for _,opponent in ipairs(characters) do
             if opponent ~= character then
-                if love.physics.getDistance(character.fixture, opponent.fixture) < Automate.punchLength then
+                if love.physics.getDistance(character.fixture, opponent.fixture) < Automate.kickLength then
                     if character:getState() == "KickingFinal" then
                         opponent:applyAction("takeAStunningHit")
                     else
