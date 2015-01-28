@@ -71,95 +71,125 @@ Character.static.spritesFolders = {
 }
 
 Character.static.actions = {
-    right = function (character)
-        if character.automate:applyEvent("move") then
+
+    right =  function (character, isActual)
+        if not isActual then
+            if character.automate:applyEvent("move") then
+                character.requiredAction = "right"
+                return true
+            else
+                return false
+            end
+        else
             local _,y = character.body:getLinearVelocity()
             character.body:setLinearVelocity(character.speed, y)
             --character.facingRight = true
-            return true
-        else
-            return false
         end
     end,
 
-    left = function (character)
-        if character.automate:applyEvent("move") then
+    left =  function (character, isActual)
+        if not isActual then
+            if character.automate:applyEvent("move") then
+                character.requiredAction = "left"
+                return true
+            else
+            return false
+        end
+        else
             local _,y = character.body:getLinearVelocity()
             character.body:setLinearVelocity(-character.speed, y)
             --character.facingRight = false
-            return true
-        else
-            return false
         end
     end,
 
-    jump = function (character)
-        if character.automate:applyEvent("jump") then
+    jump =  function (character, isActual)
+        if not isActual then
+            if character.automate:applyEvent("jump") then
+                return true
+            end
+        else
             local x,y = character.body:getLinearVelocity()
             character.body:setLinearVelocity(x, -character.jumpSpeed)
-            return true
         end
     end,
 
-    guard = function (character)
-        if character.automate:applyEvent("guard") then
-            character.body:setLinearVelocity(0,0)
-            return true
+    guard =  function (character, isActual)
+        if not isActual then    
+            if character.automate:applyEvent("guard") then
+                character.requiredAction = "guard"
+                return true
+            else
+                return false
+            end
         else
-            return false
+            character.body:setLinearVelocity(0,0)
         end
     end,
 
-    punch = function (character)
-        if character.automate:applyEvent("punch") then
+    punch =  function (character, isActual)
+        if not isActual then
+            if character.automate:applyEvent("punch") then
+                character.requiredAction = "punch"
+                return true
+            else
+                return false
+            end
+        else
             for _,opponent in ipairs(characters) do
                 if opponent ~= character then
                     if love.physics.getDistance(character.fixture, opponent.fixture) < Character.punchLength then
-                        opponent:applyAction("takeAHit")
+                        opponent:applyAction("takeAHit", false)
                     end
                 end
             end
-
-            return true
-        else
-            return false
         end
     end,
 
-    kick = function (character)
-        if character.automate:applyEvent("kick") then
-            return true
-        else
-            return false
+    kick =  function (character, isActual)
+        if not isActual then
+            if character.automate:applyEvent("kick") then
+                character.requiredAction = "kick"
+                return true
+            else
+                return false
+            end
         end
     end,
 
-    takeAHit = function (character)
-        if character.automate:applyEvent("stunningPunch") then
-            return true
-        else
-            return false
+    takeAHit =  function (character, isActual)
+        if not isActual then
+            if character.automate:applyEvent("stunningPunch") then
+                character.requiredAction = "takeAHit"
+                return true
+            else
+                return false
+            end
         end
     end,
 
-    takeAStunningHit = function (character)
-        if character.automate:applyEvent("stunningPunch") then
-            return true
-        else
-            return false
+    takeAStunningHit =  function (character, isActual)
+        if not isActual then
+            if character.automate:applyEvent("stunningPunch") then
+                character.requiredAction = "takeAStunningHit"
+                return true
+            else
+                return false
+            end
         end
     end,
 
-    stop = function (character)
-        if character.automate:applyEvent("stop") then
-            --character.body:setLinearVelocity(0,0)
-            return true
-        else
-            return false
+    stop =  function (character, isActual)
+        if not isActual then
+            if character.automate:applyEvent("stop") then
+                --character.body:setLinearVelocity(0,0)
+                return true
+            else
+                return false
+            end
         end
     end,
 
-    hitTheGround = function (character)
+    hitTheGround =  function (character, isActual)
         local dx,_ = character.body:getLinearVelocity()
         if dx == 0 then
             return character.automate:applyEvent("hitTheGround")
@@ -168,13 +198,13 @@ Character.static.actions = {
         end
     end,
 
-    noInput = function (character)
+    noInput =  function (character, isActual)
         if character:getState() == "Moving" or character:getState() == "Guarding" then
-            return character:applyAction("stop")
+            return character:applyAction("stop", false)
         end
     end,
 
-    default = function (character)
+    default =  function (character, isActual)
         local x, y, dx, dy = character.body:getX(), character.body:getY(), character.body:getLinearVelocity()
         local state = character:getState()
         local result = false
@@ -194,6 +224,7 @@ Character.static.actions = {
 
 function Character:initialize(name, x, y, _controller)
     self.name = name
+    self.requiredAction = "default" 
 
 -- sets the physic
     self.body = love.physics.newBody(world, x, y, "dynamic")
@@ -235,21 +266,23 @@ function Character:initialize(name, x, y, _controller)
     self.controller:setCharacter(self)
 end
 
+
 --looks which key is down and do the necessary things
 function Character:update(dt)
     self.controller:update()
-    self:applyAction("default")
+    self:applyAction(self.requiredAction, true)
+    self.requiredAction = "default"
     
     local actionDone = false
     for _,action in ipairs(self.continuousActions) do
         if self.controller:isDemanded(action) then
             actionDone = true
-            self:applyAction(action)
+            self:applyAction(action, false)
         end
     end
 
     if not actionDone then
-        self:applyAction("noInput")
+        self:applyAction("noInput", true)
     end
 
     self:updatePicture(dt)
@@ -261,8 +294,8 @@ function Character:applyInput(keyPressed)
 end
 
 -- applies the action on the character
-function Character:applyAction(action)
-    if Character.actions[action](self) and self:getState() ~= self.lastState then --if the state has changed
+function Character:applyAction(action, isActual)
+    if Character.actions[action](self, isActual) and self:getState() ~= self.lastState then --if the state has changed
         self.lastState = self:getState()
         self:loadAnimation()
     end
