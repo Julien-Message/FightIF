@@ -19,8 +19,8 @@ Automate.static.states = {
     
     Guarding = {stop = "Idle"},
     
-    Punching = {punch = "Punching2", kick = "Kicking2", MinTime = 0.3, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.4},
-    Punching2 = {punch = "PunchingFinal", kick = "KickingFinal", MinTime = 0.3, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.4},
+    Punching = {punch = "Punching2", kick = "Kicking2", MinTime = 0.3, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.3},
+    Punching2 = {punch = "PunchingFinal", kick = "KickingFinal", MinTime = 0.3, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.3},
     PunchingFinal = {hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
     
     Kicking = {kick = "Kicking2", punch = "Punching2", MinTime = 0.5, hit = "Idle", stunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
@@ -74,7 +74,6 @@ Automate.static.actions = {
     end,
 
     punch = function (character)
-    print(character:getState())
         for _,opponent in ipairs(characters) do
             if opponent ~= character then
                 if love.physics.getDistance(character.fixture, opponent.fixture) < Automate.punchLength then
@@ -89,6 +88,7 @@ Automate.static.actions = {
     end,
 
     kick = function (character)
+    print(character:getState())
         for _,opponent in ipairs(characters) do
             if opponent ~= character then
                 if love.physics.getDistance(character.fixture, opponent.fixture) < Automate.punchLength then
@@ -108,17 +108,11 @@ Automate.static.actions = {
     takeAStunningHit = function (character)
     end,
 
-    stop = function (character)
-        character.body:setLinearVelocity(0,0)
-    end,
 
     hitTheGround = function (character)
     end,
 
     noInput = function (character)
-        if character:getState() == "Moving" or character:getState() == "Guarding" then
-            return character:applyAction("stop")
-        end
     end,
 
     default = function (character)
@@ -157,8 +151,8 @@ function Automate:applyAction(action)
                 if Automate.states[self.currentState]["MaxTime"] then
                     self.lastTimer = love.timer.getTime()
                 end
+                return true
             end
-            return true
         end
     end
     return false
@@ -170,12 +164,7 @@ function Automate:applyAction(action)
 
 function Automate:checkTimer()
     local result = false
-    if Automate.states[self.currentState]["MaxTime"]  -- we just check if a timer is finished
-        and (love.timer.getTime() - self.lastTimer) > Automate.states[self.currentState]["MaxTime"] then
-        self.currentState = Automate.states[self.currentState]["Time"]
-        self.lastTimer = love.timer.getTime()
-        result = true
-    end
+    
     if Automate.states[self.currentState]["MinTime"]
         and (love.timer.getTime() - self.lastTimer) > Automate.states[self.currentState]["MinTime"]
         and self.nextAction then
@@ -185,6 +174,14 @@ function Automate:checkTimer()
         self.lastTimer = love.timer.getTime()
         result = true
     end
+
+    if Automate.states[self.currentState]["MaxTime"]  -- we just check if a timer is finished
+        and (love.timer.getTime() - self.lastTimer) > Automate.states[self.currentState]["MaxTime"] then
+        self.currentState = Automate.states[self.currentState]["Time"]
+        self.lastTimer = love.timer.getTime()
+        result = true
+    end
+
     return result
 end
 
