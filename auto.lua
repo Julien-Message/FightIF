@@ -165,7 +165,6 @@ function Automate:applyAction(action)
         local newState = Automate.states[self.currentState][event]
         if newState then -- we check if there is a state corresponding to the event
             if Automate.states[self.currentState]["MinTime"] then  -- Check if there is a minimum time to stay in that state.
-                print(action, event)
                 self.nextAction = event
             else  
                 self.currentState = newState
