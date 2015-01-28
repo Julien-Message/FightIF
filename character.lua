@@ -8,9 +8,9 @@ Character.static.height = 128
 Character.static.punchLength = 32
 
 Character.static.states = {
-    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned"},
+    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningHit = "Stunned"},
     
-    Moving = {stop="Idle", move = "Moving", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
+    Moving = {stop="Idle", move = "Moving", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningHit = "Stunned"},
     
     Jumping = {Time = "Falling", punch = "Uppercut", kick = "JumpingKick", MaxTime = 0.3},
     Falling = {move="Falling", hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
@@ -22,16 +22,16 @@ Character.static.states = {
     
     Guarding = {stop = "Idle"},
     
-    Punching = {punch = "Punching2", kick = "Kicking2", MinTime = 0.3, Time = "Idle", MaxTime = 0.3},
-    Punching2 = {punch = "PunchingFinal", kick = "KickingFinal", MinTime = 0.3, Time = "Idle", MaxTime = 0.3},
-    PunchingFinal = {Time = "Idle", MaxTime = 0.5},
+    Punching = {punch = "Punching2", kick = "Kicking2", MinTime = 0.3, stunningHit = "Stunned", Time = "Idle", MaxTime = 0.3},
+    Punching2 = {punch = "PunchingFinal", kick = "KickingFinal", MinTime = 0.3, stunningHit = "Stunned", Time = "Idle", MaxTime = 0.3},
+    PunchingFinal = {stunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
     
-    Kicking = {kick = "Kicking2", punch = "Punching2", MinTime = 0.5, Time = "Idle", MaxTime = 0.5},
-    Kicking2 = {kick = "KickingFinal", punch = "PunchingFinal", MinTime = 0.5, Time = "Idle", MaxTime = 0.5},
-    KickingFinal = {Time = "Idle", MaxTime = 0.7},
+    Kicking = {kick = "Kicking2", punch = "Punching2", MinTime = 0.5, stunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
+    Kicking2 = {kick = "KickingFinal", punch = "PunchingFinal", MinTime = 0.5, stunningHit = "Stunned", Time = "Idle", MaxTime = 0.5},
+    KickingFinal = {stunningHit = "Stunned", Time = "Idle", MaxTime = 0.7},
     
-    PunchingForward = {Time = "Moving", MaxTime = 0.3},
-    KickingForward = {Time = "Moving", MaxTime = 0.3},
+    PunchingForward = {Time = "Moving", stunningHit = "Stunned", MaxTime = 0.3},
+    KickingForward = {Time = "Moving", stunningHit = "Stunned", MaxTime = 0.3},
     
     Uppercut = {Time = "FallingAfterPunch", MaxTime = 0.5, hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
     UppercutSecondJump = {Time = "FallingAgainAfterPunch", MaxTime = 0.5, hitTheGround = "Idle", hitTheGroundMoving = "Moving"},
@@ -135,7 +135,7 @@ Character.static.actions = {
     end,
 
     takeAHit = function (character)
-        if character.automate:applyEvent("stunningPunch") then
+        if character.automate:applyEvent("stunningHit") then
             return true
         else
             return false
@@ -143,7 +143,7 @@ Character.static.actions = {
     end,
 
     takeAStunningHit = function (character)
-        if character.automate:applyEvent("stunningPunch") then
+        if character.automate:applyEvent("stunningHit") then
             return true
         else
             return false
