@@ -65,9 +65,24 @@ function loadCharacters()
         s = "guard"
     }
     local control1 = Controller(punctualInputs, continuousInputs)
+    
+    local punctualInputs2 = {
+        up = "jump",
+        f6 = "punch",
+        f7 = "kick"    
+    }
+
+    local continuousInputs2 = {
+        right = "right",
+        left = "left",
+        down = "guard"
+    }
+
+    local control2 = Controller(punctualInputs2, continuousInputs2)
+
     return {
         Character("Mouton", 200, 100, control1),
-        Character("Mouton", 600, 100, Controller({},{}))
+        Character("Bird", 600, 100, control2)
     }
     
 end
