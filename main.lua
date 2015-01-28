@@ -30,6 +30,17 @@ function loadGround()
     ground.shape = love.physics.newRectangleShape(width, height) --make a rectangle with a width of 650 and a height of 50
     ground.fixture = love.physics.newFixture(ground.body, ground.shape) --attach shape to body
     ground.fixture:setFriction(5)
+
+    edgeLeft = {}
+    edgeLeft.body = love.physics.newBody(world, 0, 0, "static")
+    edgeLeft.shape = love.physics.newEdgeShape(0, 0, 0, windowHeight)
+    edgeLeft.fixture = love.physics.newFixture(edgeLeft.body, edgeLeft.shape)
+
+    edgeRight = {}
+    edgeRight.body = love.physics.newBody(world, windowLength, 0, "static")
+    edgeRight.shape = love.physics.newEdgeShape(0, 0, 0, windowHeight)
+    edgeRight.fixture = love.physics.newFixture(edgeRight.body, edgeRight.shape)
+
 end
 
 function loadWorld()
