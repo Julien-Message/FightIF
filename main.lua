@@ -74,8 +74,8 @@ function loadCharacters()
     
     local punctualInputs2 = {
         up = "jump",
-        f6 = "punch",
-        f7 = "kick"    
+        b = "punch",
+        n = "kick"    
     }
 
     local continuousInputs2 = {
