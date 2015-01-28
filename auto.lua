@@ -18,7 +18,7 @@ Automate.static.states = {
     FallingAgain = {move = "FallingAgain", hitTheGround = "Idle", punch = "UppercutSecondJump", kick = "JumpingKick", hitTheGroundMoving = "Moving"},
     FallingAgainAfterPunch = {move = "FallingAgainAfterPunch", hitTheGround = "Idle"},
     
-    Guarding = {stop = "Idle"},
+    Guarding = {stop = "Idle", takeAHit = "Guarding", takeAStunningHit = "Guarding"},
     
     Punching = {punch = "Punching2", kick = "Kicking2", MinTime = 0.3, takeAHit = "Idle", takeAStunningHit = "Stunned", Time = "Idle", MaxTime = 0.3},
     Punching2 = {punch = "PunchingFinal", kick = "KickingFinal", MinTime = 0.3, takeAHit = "Idle", takeAStunningHit = "Stunned", Time = "Idle", MaxTime = 0.3},
@@ -111,18 +111,21 @@ Automate.static.actions = {
     end,
 
     takeAHit = function (character)
-        if not character:getState() == "Guarding" then
-            character:losePV(10)
+        if not (character:getState() == "Guarding") then
+            character:losePV(5)
+            character:goBack(100)
         else
-            character:losePV(2)
+            character:losePV(1)
         end
     end,
 
     takeAStunningHit = function (character)
-        if not character:getState() == "Guarding" then
-            character:losePV(20)
+        if not (character:getState() == "Guarding") then
+            character:losePV(15)
+            character:goBack(1000)
         else
-            character:losePV(6)
+            character:losePV(3)
+            character:goBack(200)
         end
     end,
 
@@ -141,7 +144,7 @@ Automate.static.actions = {
             character.automate:applyEvent("fall")
         end
 
-        if state == "Idle" or state == "Stunned" or Automate.states[state]["hitTheGround"] or Automate.states[state]["punch"] then
+        if state == "Idle" or state == "Stunned" or state == "Guarding" or Automate.states[state]["hitTheGround"] or Automate.states[state]["punch"] then
             character.body:setLinearVelocity(dx * 0.8, dy)
         end
         --check if a timer has finished

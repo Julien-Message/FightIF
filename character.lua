@@ -137,7 +137,7 @@ function Character:updatePicture(dt)
 end
 
 function Character:losePV(n)
-    if n > self.PV then
+    if n >= self.PV then
         self.PV = 0
         self.isDead = true
     else
@@ -147,6 +147,17 @@ end
 
 function Character:getPV()
     return self.PV
+end
+
+function Character:goBack(i)
+    dx, dy = self.body:getLinearVelocity()
+    local flipped
+    if self.facingRight then
+        flipped = -1
+    else
+        flipped = 1
+    end
+    self.body:setLinearVelocity(dx + flipped * i, dy - 0.1 * i)
 end
 
 function Character:draw()
