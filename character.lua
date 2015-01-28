@@ -21,13 +21,13 @@ Character.static.spritesFolders = {
 
     Kicking = "kick",
     Kicking2 = "kick2",
-    KickingFinal = "kick",
+    KickingFinal = "kickfinal",
     KickingForward = "kick2",
-    JumpingKick = "kick2",
+    JumpingKick = "jumpkick",
 
     Punching = "punch",
     Punching2 = "punch2",
-    PunchingFinal = "punch",
+    PunchingFinal = "punchfinal",
     PunchingForward = "punch2",
     Uppercut = "punch2",
     UppercutSecondJump = "punch2",
