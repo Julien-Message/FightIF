@@ -29,25 +29,24 @@ function Automate:applyEvent(event) --returns true if the state has changed
 end
 
 function Automate:checkTimer()
+    local result = false
     if self.states[self.currentState]["MaxTime"]  -- we just check if a timer is finished
         and (love.timer.getTime() - self.lastTimer) > self.states[self.currentState]["MaxTime"]
         and self.nextState == self.currentState then
         self.currentState = self.states[self.currentState]["Time"]
         self.lastTimer = love.timer.getTime()
         self.nextState = self.currentState
-        return true
-    else
-        if self.states[self.currentState]["MinTime"]
-            and (love.timer.getTime() - self.lastTimer) > self.states[self.currentState]["MinTime"]
-            and self.nextState ~= self.currentState then
-            self.currentState = self.nextState
-            self.lastTimer = love.timer.getTime()
-            self.nextState = self.currentState
-            return true
-        else
-            return false
-        end
+        result = true
     end
+    if self.states[self.currentState]["MinTime"]
+        and (love.timer.getTime() - self.lastTimer) > self.states[self.currentState]["MinTime"]
+        and self.nextState ~= self.currentState then
+        self.currentState = self.nextState
+        self.lastTimer = love.timer.getTime()
+        self.nextState = self.currentState
+        result = true
+    end
+    return result
 end
 
 return Automate
