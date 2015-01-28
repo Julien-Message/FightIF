@@ -8,9 +8,9 @@ Character.static.height = 128
 Character.static.punchLength = 32
 
 Character.static.states = {
-    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned"},
+    Idle = {move = "Moving", jump = "Jumping", fall = "Falling", guard = "Guarding", punch = "Punching", kick = "Kicking", stunningPunch = "Stunned", tookHit = "Idle"},
     
-    Moving = {stop="Idle", move = "Moving", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned"},
+    Moving = {stop="Idle", move = "Moving", jump = "Jumping", fall = "Falling", punch = "PunchingForward", kick = "KickingForward", guard = "Guarding", stunningPunch = "Stunned", tookHit = "Moving"},
     
     Jumping = {Time = "Falling", punch = "Uppercut", kick = "JumpingKick", MaxTime = 0.3},
     Falling = {move="Falling", hitTheGround = "Idle", punch = "Uppercut", kick = "JumpingKick", hitTheGroundMoving = "Moving", jump = "JumpingAgain"},
@@ -76,6 +76,7 @@ Character.static.actions = {
         if not isActual then
             if character.automate:applyEvent("move") then
                 character.requiredAction = "right"
+                character.requiredState = character.automate.nextState
                 return true
             else
                 return false
@@ -91,6 +92,7 @@ Character.static.actions = {
         if not isActual then
             if character.automate:applyEvent("move") then
                 character.requiredAction = "left"
+                character.requiredState = character.automate.nextState
                 return true
             else
             return false
@@ -105,6 +107,8 @@ Character.static.actions = {
     jump =  function (character, isActual)
         if not isActual then
             if character.automate:applyEvent("jump") then
+                character.requiredAction = "jump"
+                character.requiredState = character.automate.nextState
                 return true
             end
         else
@@ -117,6 +121,7 @@ Character.static.actions = {
         if not isActual then    
             if character.automate:applyEvent("guard") then
                 character.requiredAction = "guard"
+                character.requiredState = character.automate.nextState
                 return true
             else
                 return false
@@ -130,6 +135,7 @@ Character.static.actions = {
         if not isActual then
             if character.automate:applyEvent("punch") then
                 character.requiredAction = "punch"
+                character.requiredState = character.automate.nextState
                 return true
             else
                 return false
@@ -138,7 +144,11 @@ Character.static.actions = {
             for _,opponent in ipairs(characters) do
                 if opponent ~= character then
                     if love.physics.getDistance(character.fixture, opponent.fixture) < Character.punchLength then
-                        opponent:applyAction("takeAHit", false)
+                        if character.automate.currentState ~= "PunchFinal" then
+                            opponent:applyAction("takeAHit", false)
+                        else
+                            opponent:applyAction("takeAStunningHit", false)
+                        end
                     end
                 end
             end
@@ -149,6 +159,7 @@ Character.static.actions = {
         if not isActual then
             if character.automate:applyEvent("kick") then
                 character.requiredAction = "kick"
+                character.requiredState = character.automate.nextState
                 return true
             else
                 return false
@@ -158,8 +169,9 @@ Character.static.actions = {
 
     takeAHit =  function (character, isActual)
         if not isActual then
-            if character.automate:applyEvent("stunningPunch") then
+            if character.automate:applyEvent("tookHit") then
                 character.requiredAction = "takeAHit"
+                character.requiredState = character.automate.nextState
                 return true
             else
                 return false
@@ -171,6 +183,7 @@ Character.static.actions = {
         if not isActual then
             if character.automate:applyEvent("stunningPunch") then
                 character.requiredAction = "takeAStunningHit"
+                character.requiredState = character.automate.nextState
                 return true
             else
                 return false
@@ -225,7 +238,7 @@ Character.static.actions = {
 function Character:initialize(name, x, y, _controller)
     self.name = name
     self.requiredAction = "default" 
-
+    self.requiredState = nil
 -- sets the physic
     self.body = love.physics.newBody(world, x, y, "dynamic")
     self.shape = love.physics.newPolygonShape(
@@ -270,10 +283,15 @@ end
 --looks which key is down and do the necessary things
 function Character:update(dt)
     self.controller:update()
-    self:applyAction(self.requiredAction, true)
-    self.requiredAction = "default"
+    self:applyAction("default", true)
     
     local actionDone = false
+    if (self.automate.currentState == self.requiredState) then
+        self:applyAction(self.requiredAction, true)
+        self.requiredState = nil
+        actionDone = true
+    end
+
     for _,action in ipairs(self.continuousActions) do
         if self.controller:isDemanded(action) then
             actionDone = true
