@@ -22,8 +22,9 @@ function love.keypressed(k)
 end
 
 function loadGround()
-    local width = windowLength - 200 --try not falling !
-    local height = 100
+    local width = windowLength
+    local height = 120
+    arenaGround = love.graphics.newImage(graphicsFolder.."/Arena/battleground.png")
     ground = {}
     ground.body = love.physics.newBody(world, windowLength/2, windowHeight-height/2, "static") --remember, the shape anchors to the body from its center
     ground.shape = love.physics.newRectangleShape(width, height) --make a rectangle with a width of 650 and a height of 50
@@ -33,6 +34,7 @@ end
 
 function loadWorld()
     local scale = 64 --pixels per meter
+    worldBG = love.graphics.newImage(graphicsFolder.."/Arena/fond.jpg")
     love.physics.setMeter(scale)
     world = love.physics.newWorld(0, 15*scale, true) -- Unfortunately, we're not in space, so gravity
     loadGround()
@@ -94,8 +96,8 @@ end
 
 function love.draw()
     -- let's draw some ground
-    love.graphics.setColor(72, 160, 14)
-    love.graphics.polygon("fill", ground.body:getWorldPoints(ground.shape:getPoints()))
+    love.graphics.draw(worldBG, 0, 0)
+    love.graphics.draw(arenaGround,0, windowHeight - 180 )
 
     if characters[1].body:getX() < characters[2].body:getX() then
         characters[1].facingRight = true
