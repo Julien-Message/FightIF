@@ -79,8 +79,12 @@ Automate.static.actions = {
             if opponent ~= character then
                 if love.physics.getDistance(character.fixture, opponent.fixture) < Automate.punchLength then
                     if character:getState() == "PunchingFinal" then
+                        local audio = love.audio.newSource("sounds/PowerPunch.mp3")
+                        audio:play()
                         opponent:applyAction("takeAStunningHit")
                     else
+                        local audio = love.audio.newSource("sounds/Punch.mp3")
+                        audio:play()
                         opponent:applyAction("takeAHit")
                     end
                 end
@@ -93,8 +97,12 @@ Automate.static.actions = {
             if opponent ~= character then
                 if love.physics.getDistance(character.fixture, opponent.fixture) < Automate.kickLength then
                     if character:getState() == "KickingFinal" then
+                        local audio = love.audio.newSource("sounds/PowerKick.mp3")
+                        audio:play()
                         opponent:applyAction("takeAStunningHit")
                     else
+                        local audio = love.audio.newSource("sounds/Kick.mp3")
+                        audio:play()
                         opponent:applyAction("takeAHit")
                     end
                 end
